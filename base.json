@@ -1,0 +1,2176 @@
+{
+  "default_bookshelf.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/bookshelf.png"
+    }
+  },
+  "farming_bread.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/bread.png"
+    }
+  },
+  "bucket.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/bucket.png"
+    }
+  },
+  "bucket_lava.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/lava_bucket.png"
+    }
+  },
+  "bucket_water.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/water_bucket.png"
+    }
+  },
+  "default_clay_brick.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/brick.png"
+    }
+  },
+  "default_clay.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/clay.png"
+    }
+  },
+  "default_coal_lump.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/coal.png"
+    }
+  },
+  "default_coal_block.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/coal_block.png"
+    }
+  },
+  "default_mineral_coal.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/coal_ore.png"
+    }
+  },
+  "default_cobble.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/cobblestone.png"
+    }
+  },
+  "default_mossycobble.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/mossy_cobblestone.png"
+    }
+  },
+  "default_diamond.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/diamond.png"
+    }
+  },
+  "default_diamond_block.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/diamond_block.png"
+    }
+  },
+  "default_mineral_diamond.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/diamond_ore.png"
+    }
+  },
+  "default_dirt.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/dirt.png"
+    }
+  },
+  "doors_item_wood.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/oak_door.png"
+    }
+  },
+  "doors_item_steel.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/iron_door.png"
+    }
+  },
+  "default_furnace_front.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/furnace_front.png"
+    }
+  },
+  "default_furnace_front_active.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/furnace_front_on.png"
+    }
+  },
+  "default_furnace_side.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/furnace_side.png"
+    }
+  },
+  "default_furnace_top.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/furnace_top.png"
+    }
+  },
+  "default_glass.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/glass.png"
+    }
+  },
+  "default_gold_block.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/gold_block.png"
+    }
+  },
+  "default_gold_ingot.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/gold_ingot.png"
+    }
+  },
+  "default_mineral_gold.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/gold_ore.png"
+    }
+  },
+  "default_gravel.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/gravel.png"
+    }
+  },
+  "default_ice.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/ice.png"
+    }
+  },
+  "default_steel_block.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/iron_block.png"
+    }
+  },
+  "default_steel_ingot.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/iron_ingot.png"
+    }
+  },
+  "default_mineral_iron.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/iron_ore.png"
+    }
+  },
+  "default_ladder_wood.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/ladder.png"
+    }
+  },
+  "default_tree.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/oak_log.png"
+    }
+  },
+  "default_tree_top.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/oak_log_top.png"
+    }
+  },
+  "default_acacia_tree.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/acacia_log.png"
+    }
+  },
+  "default_acacia_tree_top.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/acacia_log_top.png"
+    }
+  },
+  "default_obsidian.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/obsidian.png"
+    }
+  },
+  "default_wood.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/oak_planks.png"
+    }
+  },
+  "default_acacia_wood.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/acacia_planks.png"
+    }
+  },
+  "default_sand.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/sand.png"
+    }
+  },
+  "default_sandstone.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/sandstone_top.png"
+    }
+  },
+  "default_sandstone_brick.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/sandstone.png"
+    }
+  },
+  "default_sandstone_block.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/cut_sandstone.png"
+    }
+  },
+  "default_sapling.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/oak_sapling.png"
+    }
+  },
+  "default_stick.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/stick.png"
+    }
+  },
+  "default_stone.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/stone.png"
+    }
+  },
+  "default_stone_brick.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/stone_bricks.png"
+    }
+  },
+  "default_stone_block.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/chiseled_stone_bricks.png"
+    }
+  },
+  "tnt_bottom.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/tnt_bottom.png"
+    }
+  },
+  "tnt_side.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/tnt_side.png"
+    }
+  },
+  "tnt_top.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/tnt_top.png"
+    }
+  },
+  "wool_white.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/white_wool.png"
+    }
+  },
+  "doors_door_steel.png": {
+    "type": "compose_door",
+    "sources": {
+      "lower": "assets/minecraft/textures/block/iron_door_bottom.png",
+      "upper": "assets/minecraft/textures/block/iron_door_top.png"
+    }
+  },
+  "fire_flint_steel.png": {
+    "type": "transform",
+    "sources": {
+      "source": "assets/minecraft/textures/item/flint_and_steel.png"
+    }
+  },
+  "screenshot.png": {
+    "type": "rename",
+    "sources": {
+      "source": "pack.png"
+    }
+  },
+  "default_brick.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/bricks.png"
+    }
+  },
+  "default_ladder_steel.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/ladder.png",
+      "colorSourceType": "specific_color",
+      "colorValue": "#808080",
+      "colorizeBrightness": 2.6
+    }
+  },
+  "boats_inventory.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/oak_boat.png"
+    }
+  },
+  "carts_rail_straight.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/rail.png"
+    }
+  },
+  "carts_rail_curved.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/rail_corner.png"
+    }
+  },
+  "default_desert_cobble.png": {
+    "type": "compose",
+    "sources": {
+      "baseImage": "assets/minecraft/textures/block/cobblestone.png",
+      "topImage": "assets/minecraft/textures/block/red_sand.png",
+      "composeMode": "overlay",
+      "topOpacity": 1
+    }
+  },
+  "default_copper_ingot.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/iron_ingot.png",
+      "colorSourceType": "specific_color",
+      "colorValue": "#ca8654",
+      "colorizeBrightness": 1.15
+    }
+  },
+  "carts_rail_straight_pwr.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/powered_rail_on.png"
+    }
+  },
+  "default_acacia_bush_sapling.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/acacia_sapling.png"
+    }
+  },
+  "crack_anylength.png": {
+    "type": "montage",
+    "sources": {
+      "parts": [
+        {
+          "source": "assets/minecraft/textures/block/destroy_stage_0.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 16,
+          "sh": 16,
+          "dx": 0,
+          "dy": 0,
+          "rotate": 0
+        },
+        {
+          "source": "assets/minecraft/textures/block/destroy_stage_1.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 16,
+          "sh": 16,
+          "dx": 0,
+          "dy": 16,
+          "rotate": 0
+        },
+        {
+          "source": "assets/minecraft/textures/block/destroy_stage_2.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 16,
+          "sh": 16,
+          "dx": 0,
+          "dy": 32,
+          "rotate": 0
+        },
+        {
+          "source": "assets/minecraft/textures/block/destroy_stage_3.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 16,
+          "sh": 16,
+          "dx": 0,
+          "dy": 48,
+          "rotate": 0
+        },
+        {
+          "source": "assets/minecraft/textures/block/destroy_stage_4.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 16,
+          "sh": 16,
+          "dx": 0,
+          "dy": 64,
+          "rotate": 0
+        },
+        {
+          "source": "assets/minecraft/textures/block/destroy_stage_5.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 16,
+          "sh": 16,
+          "dx": 0,
+          "dy": 80,
+          "rotate": 0
+        },
+        {
+          "source": "assets/minecraft/textures/block/destroy_stage_6.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 16,
+          "sh": 16,
+          "dx": 0,
+          "dy": 96,
+          "rotate": 0
+        },
+        {
+          "source": "assets/minecraft/textures/block/destroy_stage_7.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 16,
+          "sh": 16,
+          "dx": 0,
+          "dy": 112,
+          "rotate": 0
+        },
+        {
+          "source": "assets/minecraft/textures/block/destroy_stage_8.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 16,
+          "sh": 16,
+          "dx": 0,
+          "dy": 128,
+          "rotate": 0
+        },
+        {
+          "source": "assets/minecraft/textures/block/destroy_stage_9.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 16,
+          "sh": 16,
+          "dx": 0,
+          "dy": 144,
+          "rotate": 0
+        }
+      ],
+      "canvasW": 16,
+      "canvasH": 160
+    }
+  },
+  "wool_yellow.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/yellow_wool.png"
+    }
+  },
+  "wool_red.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/red_wool.png"
+    }
+  },
+  "wool_pink.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/pink_wool.png"
+    }
+  },
+  "wool_magenta.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/magenta_wool.png"
+    }
+  },
+  "wool_orange.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/orange_wool.png"
+    }
+  },
+  "wool_grey.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/gray_wool.png"
+    }
+  },
+  "wool_green.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/lime_wool.png"
+    }
+  },
+  "wool_dark_green.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/green_wool.png"
+    }
+  },
+  "wool_black.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/black_wool.png"
+    }
+  },
+  "wool_blue.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/blue_wool.png"
+    }
+  },
+  "wool_cyan.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/cyan_wool.png"
+    }
+  },
+  "wool_brown.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/brown_wool.png"
+    }
+  },
+  "vessels_glass_bottle.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/glass_bottle.png"
+    }
+  },
+  "tnt_top_burning.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/tnt_top.png"
+    }
+  },
+  "flowers_rose.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/poppy.png"
+    }
+  },
+  "flowers_viola.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/allium.png"
+    }
+  },
+  "flowers_tulip.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/orange_tulip.png"
+    }
+  },
+  "flowers_tulip_black.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/pink_tulip.png"
+    }
+  },
+  "flowers_geranium.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/blue_orchid.png"
+    }
+  },
+  "flowers_dandelion_white.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/dandelion.png"
+    }
+  },
+  "flowers_dandelion_yellow.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/dandelion.png"
+    }
+  },
+  "flowers_chrysanthemum_green.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/azure_bluet.png"
+    }
+  },
+  "flowers_mushroom_brown.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/brown_mushroom.png"
+    }
+  },
+  "flowers_mushroom_red.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/red_mushroom.png"
+    }
+  },
+  "fire_basic_flame.png": {
+    "type": "transform",
+    "sources": {
+      "source": "assets/minecraft/textures/block/fire_0.png",
+      "cropX": 0,
+      "cropW": 16,
+      "cropH": 16
+    }
+  },
+  "farming_wheat.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/wheat.png"
+    }
+  },
+  "farming_wheat_seed.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/wheat_seeds.png"
+    }
+  },
+  "farming_wheat_1.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/wheat_stage1.png"
+    }
+  },
+  "farming_wheat_2.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/wheat_stage2.png"
+    }
+  },
+  "farming_wheat_3.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/wheat_stage3.png"
+    }
+  },
+  "farming_wheat_4.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/wheat_stage4.png"
+    }
+  },
+  "farming_wheat_5.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/wheat_stage5.png"
+    }
+  },
+  "farming_wheat_6.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/wheat_stage6.png"
+    }
+  },
+  "farming_wheat_7.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/wheat_stage7.png"
+    }
+  },
+  "farming_wheat_8.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/wheat.png"
+    }
+  },
+  "farming_tool_woodhoe.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/wooden_hoe.png"
+    }
+  },
+  "farming_tool_stonehoe.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/stone_hoe.png"
+    }
+  },
+  "farming_tool_steelhoe.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/iron_hoe.png"
+    }
+  },
+  "farming_tool_mesehoe.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/golden_hoe.png"
+    }
+  },
+  "farming_tool_diamondhoe.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/diamond_hoe.png"
+    }
+  },
+  "farming_straw.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/hay_block_side.png"
+    }
+  },
+  "farming_soil.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/farmland.png"
+    }
+  },
+  "farming_soil_wet.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/farmland_moist.png"
+    }
+  },
+  "farming_flour.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/sugar.png"
+    }
+  },
+  "fire_basic_flame_animated.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/fire_0.png"
+    }
+  },
+  "dye_yellow.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/yellow_dye.png"
+    }
+  },
+  "dye_white.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/white_dye.png"
+    }
+  },
+  "dye_red.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/red_dye.png"
+    }
+  },
+  "dye_orange.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/orange_dye.png"
+    }
+  },
+  "dye_green.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/green_dye.png"
+    }
+  },
+  "dye_grey.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/gray_dye.png"
+    }
+  },
+  "dye_magenta.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/magenta_dye.png"
+    }
+  },
+  "dye_pink.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/pink_dye.png"
+    }
+  },
+  "dye_dark_green.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/green_dye.png"
+    }
+  },
+  "dye_black.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/black_dye.png"
+    }
+  },
+  "dye_blue.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/light_blue_dye.png"
+    }
+  },
+  "dye_brown.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/brown_dye.png"
+    }
+  },
+  "dye_cyan.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/cyan_dye.png"
+    }
+  },
+  "dye_violet.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/purple_dye.png"
+    }
+  },
+  "doors_trapdoor.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/oak_trapdoor.png"
+    }
+  },
+  "doors_trapdoor_steel.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/iron_trapdoor.png"
+    }
+  },
+  "heart.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/particle/heart.png"
+    }
+  },
+  "gui_hotbar.png": {
+    "type": "transform",
+    "sources": {
+      "source": "assets/minecraft/textures/gui/widgets.png",
+      "canvasW": 0,
+      "cropW": 162,
+      "cropH": 22
+    }
+  },
+  "tnt_top_burning_animated.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/tnt_top.png",
+      "colorSourceType": "specific_color",
+      "colorizeAlpha": 0.7
+    }
+  },
+  "default_acacia_sapling.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/acacia_sapling.png"
+    }
+  },
+  "default_aspen_sapling.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/birch_sapling.png"
+    }
+  },
+  "default_aspen_tree_top.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/birch_log_top.png"
+    }
+  },
+  "default_aspen_tree.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/birch_log.png"
+    }
+  },
+  "default_aspen_wood.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/birch_planks.png"
+    }
+  },
+  "default_book_written.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/writable_book.png"
+    }
+  },
+  "default_book.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/book.png"
+    }
+  },
+  "default_cactus_side.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/cactus_side.png"
+    }
+  },
+  "default_cactus_top.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/cactus_top.png"
+    }
+  },
+  "default_chest_lock.png": {
+    "type": "create_chest",
+    "sources": {
+      "source": "assets/minecraft/textures/entity/chest/normal.png"
+    }
+  },
+  "default_coral_pink.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/fire_coral.png"
+    }
+  },
+  "default_desert_sand.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/sand.png"
+    }
+  },
+  "default_desert_sandstone_block.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/sandstone.png"
+    }
+  },
+  "default_desert_sandstone.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/red_sand.png"
+    }
+  },
+  "default_grass_side.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/grass_block_side.png"
+    }
+  },
+  "default_tool_stoneaxe.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/stone_axe.png"
+    }
+  },
+  "default_tool_stonepick.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/stone_pickaxe.png"
+    }
+  },
+  "default_tool_stoneshovel.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/stone_shovel.png"
+    }
+  },
+  "default_tool_stonesword.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/stone_sword.png"
+    }
+  },
+  "default_silver_sandstone.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/sandstone_top.png",
+      "colorSourceType": "self",
+      "colorX": 10,
+      "colorY": 3,
+      "colorizeBlendMode": "color"
+    }
+  },
+  "default_tool_woodaxe.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/wooden_axe.png"
+    }
+  },
+  "default_tool_woodpick.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/wooden_pickaxe.png"
+    }
+  },
+  "default_tool_woodshovel.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/wooden_shovel.png"
+    }
+  },
+  "default_tool_woodsword.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/wooden_sword.png"
+    }
+  },
+  "default_tool_steelsword.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/iron_sword.png"
+    }
+  },
+  "default_tool_steelshovel.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/iron_shovel.png"
+    }
+  },
+  "default_tool_steelpick.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/iron_pickaxe.png"
+    }
+  },
+  "default_tool_steelaxe.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/iron_axe.png"
+    }
+  },
+  "default_torch_animated.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/torch.png"
+    }
+  },
+  "default_torch_on_floor.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/torch.png"
+    }
+  },
+  "default_tool_mesesword.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/golden_sword.png"
+    }
+  },
+  "default_tool_meseshovel.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/golden_shovel.png"
+    }
+  },
+  "default_tool_mesepick.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/golden_pickaxe.png"
+    }
+  },
+  "default_tool_meseaxe.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/golden_axe.png"
+    }
+  },
+  "default_tool_diamondsword.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/diamond_sword.png"
+    }
+  },
+  "default_tool_diamondshovel.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/diamond_shovel.png"
+    }
+  },
+  "default_tool_diamondpick.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/diamond_pickaxe.png"
+    }
+  },
+  "default_tool_diamondaxe.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/diamond_axe.png"
+    }
+  },
+  "default_furnace_bottom.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/furnace_top.png"
+    }
+  },
+  "craftguide_furnace.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/furnace_front_on.png"
+    }
+  },
+  "default_emergent_jungle_sapling.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/dead_bush.png"
+    }
+  },
+  "default_fence_acacia_wood.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/acacia_planks.png"
+    }
+  },
+  "default_fence_aspen_wood.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/birch_planks.png"
+    }
+  },
+  "default_fence_wood.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/oak_planks.png"
+    }
+  },
+  "default_fence_junglewood.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/dark_oak_planks.png"
+    }
+  },
+  "default_copper_lump.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/raw_copper.png"
+    }
+  },
+  "default_clay_lump.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/clay_ball.png"
+    }
+  },
+  "default_gold_lump.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/raw_gold.png"
+    }
+  },
+  "default_iron_lump.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/raw_iron.png"
+    }
+  },
+  "default_fern_3.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/fern.png",
+      "colorSourceType": "self",
+      "colorX": 10,
+      "colorY": 20,
+      "colorizeBrightness": 1.45
+    }
+  },
+  "default_flint.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/flint.png"
+    }
+  },
+  "default_furnace_fire_fg.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/campfire.png"
+    }
+  },
+  "default_junglesapling.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/jungle_sapling.png"
+    }
+  },
+  "default_jungletree_top.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/jungle_log_top.png"
+    }
+  },
+  "default_jungletree.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/jungle_log.png"
+    }
+  },
+  "default_junglewood.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/jungle_planks.png"
+    }
+  },
+  "default_lava_flowing_animated.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/lava_flow.png"
+    }
+  },
+  "default_lava_source_animated.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/lava_still.png"
+    }
+  },
+  "default_lava.png": {
+    "type": "transform",
+    "sources": {
+      "source": "assets/minecraft/textures/block/lava_still.png",
+      "cropW": 16,
+      "cropH": 16
+    }
+  },
+  "default_meselamp.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/redstone_lamp_on.png"
+    }
+  },
+  "default_snow.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/snow.png"
+    }
+  },
+  "default_snowball.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/snowball.png"
+    }
+  },
+  "default_fence_pine_wood.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/spruce_planks.png"
+    }
+  },
+  "default_pine_tree_top.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/spruce_log_top.png"
+    }
+  },
+  "default_pine_tree.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/spruce_log.png"
+    }
+  },
+  "default_pine_wood.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/spruce_planks.png"
+    }
+  },
+  "default_pine_sapling.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/spruce_sapling.png"
+    }
+  },
+  "default_papyrus.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/block/sugar_cane.png"
+    }
+  },
+  "default_paper.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/paper.png"
+    }
+  },
+  "default_tin_block.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/iron_block.png",
+      "colorSourceType": "self",
+      "colorX": 0.44,
+      "colorY": 0.38,
+      "isProportional": true
+    }
+  },
+  "default_obsidian_shard.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/prismarine_shard.png",
+      "colorSourceType": "minecraft",
+      "colorX": 0.31,
+      "colorY": 0.38,
+      "colorSource": "assets/minecraft/textures/block/obsidian.png",
+      "isProportional": true,
+      "colorizeBrightness": 1.05
+    }
+  },
+  "default_river_water_source_animated.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/water_still.png",
+      "colorSourceType": "self",
+      "colorX": 0.69,
+      "colorY": 0.01,
+      "isProportional": true,
+      "colorizeBrightness": 1
+    }
+  },
+  "default_river_water_flowing_animated.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/water_flow.png",
+      "colorSourceType": "self",
+      "colorX": 0.56,
+      "colorY": 0.96,
+      "isProportional": true,
+      "colorizeBrightness": 1
+    }
+  },
+  "default_snow_side.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/grass_block_side_overlay.png",
+      "colorSourceType": "minecraft",
+      "colorX": 0.5,
+      "colorY": 0.56,
+      "isProportional": true,
+      "colorSource": "assets/minecraft/textures/block/snow.png",
+      "colorizeBrightness": 1,
+      "colorizeBlendMode": "overlay"
+    }
+  },
+  "default_jungleleaves_simple.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/jungle_leaves.png",
+      "colorSourceType": "self",
+      "colorX": 0.25,
+      "colorY": 0.69,
+      "isProportional": true,
+      "colorizeBlendMode": "multiply",
+      "colorizeBrightness": 1
+    }
+  },
+  "default_furnace_fire_bg.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/campfire.png",
+      "colorSourceType": "self",
+      "colorX": 8,
+      "colorY": 10,
+      "colorizeBlendMode": "exclusion",
+      "colorizeBrightness": 1,
+      "isProportional": true
+    }
+  },
+  "default_tin_lump.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/raw_iron.png",
+      "colorSourceType": "self",
+      "colorX": 0.44,
+      "colorY": 0.44,
+      "isProportional": true,
+      "colorizeBrightness": 1
+    }
+  },
+  "default_bookshelf_slot.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/book.png",
+      "colorSourceType": "specific_color",
+      "colorX": 7,
+      "colorY": 10,
+      "colorizeBlendMode": "exclusion",
+      "colorizeBrightness": 3,
+      "colorValue": "#ffffff",
+      "colorizeAlpha": 1,
+      "isProportional": true
+    }
+  },
+  "gui_hotbar_selected.png": {
+    "type": "transform",
+    "sources": {
+      "source": "assets/minecraft/textures/gui/widgets.png",
+      "cropX": 0.09375,
+      "cropW": 0.0859375,
+      "cropH": 0.0859375,
+      "cropY": 0.08984375,
+      "isProportional": true,
+      "canvasOffsetY": 0
+    }
+  },
+  "default_water_source_animated.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/water_still.png",
+      "colorSourceType": "self",
+      "colorX": 0.38,
+      "colorY": 0.96,
+      "colorizeBlendMode": "color",
+      "isProportional": true,
+      "colorizeBrightness": 1
+    }
+  },
+  "default_water.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/water_overlay.png",
+      "colorSourceType": "self",
+      "colorX": 0.56,
+      "colorY": 0.56,
+      "colorizeBlendMode": "color",
+      "isProportional": true,
+      "colorizeBrightness": 1
+    }
+  },
+  "default_grass.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/grass_block_top.png",
+      "colorSourceType": "self",
+      "colorX": 0.56,
+      "colorY": 0.25,
+      "isProportional": true
+    }
+  },
+  "default_leaves.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/oak_leaves.png",
+      "colorSourceType": "self",
+      "colorX": 0.69,
+      "colorY": 0,
+      "isProportional": true
+    }
+  },
+  "default_pine_needles.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/spruce_leaves.png",
+      "colorSourceType": "self",
+      "colorX": 0.69,
+      "colorY": 0.25,
+      "isProportional": true
+    }
+  },
+  "default_acacia_leaves.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/acacia_leaves.png",
+      "colorSourceType": "self",
+      "colorX": 0.75,
+      "colorY": 0.19,
+      "isProportional": true
+    }
+  },
+  "default_mese_block.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/emerald_block.png",
+      "colorSourceType": "self",
+      "colorValue": "#55ff55",
+      "colorX": 0.44,
+      "colorY": 0.19,
+      "colorizeBrightness": 0.9,
+      "colorizeBlendMode": "overlay",
+      "isProportional": true
+    }
+  },
+  "default_mese_crystal.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/emerald.png",
+      "colorSourceType": "self",
+      "colorValue": "#55ff55",
+      "colorX": 0.38,
+      "colorY": 0.31,
+      "colorizeBlendMode": "overlay",
+      "colorizeBrightness": 0.9,
+      "isProportional": true
+    }
+  },
+  "default_bronze_block.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/iron_block.png",
+      "colorSourceType": "self",
+      "colorValue": "#b4754b",
+      "colorX": 0.38,
+      "colorY": 0.38,
+      "isProportional": true
+    }
+  },
+  "default_bronze_ingot.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/iron_ingot.png",
+      "colorSourceType": "self",
+      "colorValue": "#6f4c35",
+      "colorX": 0.38,
+      "colorY": 0.38,
+      "isProportional": true
+    }
+  },
+  "default_mineral_mese.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/emerald_ore.png",
+      "colorSourceType": "self",
+      "colorX": 0.38,
+      "colorY": 0.63,
+      "enableColorReplace": true,
+      "replaceColors": [
+        {
+          "color": "#d9ffeb",
+          "tolerance": 79
+        },
+        {
+          "color": "#17dd62",
+          "tolerance": 81
+        },
+        {
+          "color": "#007b18",
+          "tolerance": 82
+        },
+        {
+          "color": "#41f384",
+          "tolerance": 79
+        },
+        {
+          "color": "#375b3e",
+          "tolerance": 81
+        }
+      ],
+      "colorizeBlendMode": "color",
+      "hueTolerance": 91,
+      "minSaturation": 0.08,
+      "colorizeBrightness": 1.05,
+      "isProportional": true
+    }
+  },
+  "carts_rail_curved_brk.png": {
+    "type": "colorize",
+    "sources": {
+      "colorSourceType": "specific_color",
+      "base": "assets/minecraft/textures/block/rail_corner.png",
+      "colorValue": "#ff0000",
+      "colorX": 6,
+      "colorY": 8,
+      "enableColorReplace": true,
+      "replaceColorValue": "#72796e",
+      "colorizeBrightness": 3,
+      "replaceTolerance": 50,
+      "colorizeAlpha": 1,
+      "replaceColors": [
+        {
+          "color": "#686868",
+          "tolerance": 53
+        }
+      ],
+      "colorizeBlendMode": "overlay",
+      "hueTolerance": 36,
+      "isProportional": true
+    }
+  },
+  "creative_trash_icon.png": {
+    "type": "transform",
+    "sources": {
+      "source": "assets/minecraft/textures/gui/container/creative_inventory/tab_inventory.png",
+      "cropW": 0.06640625,
+      "cropX": 0.67578125,
+      "canvasW": 16,
+      "canvasH": 16,
+      "cropH": 0.06640625,
+      "cropY": 0.4375,
+      "isProportional": true
+    }
+  },
+  "carts_rail_curved_pwr.png": {
+    "type": "colorize",
+    "sources": {
+      "colorSourceType": "specific_color",
+      "base": "assets/minecraft/textures/block/rail_corner.png",
+      "colorValue": "#eeff00",
+      "colorX": 6,
+      "colorY": 8,
+      "enableColorReplace": true,
+      "replaceColorValue": "#72796e",
+      "colorizeBrightness": 3,
+      "replaceTolerance": 50,
+      "colorizeAlpha": 1,
+      "replaceColors": [
+        {
+          "color": "#686868",
+          "tolerance": 53
+        }
+      ],
+      "colorizeBlendMode": "overlay",
+      "hueTolerance": 74,
+      "isProportional": true
+    }
+  },
+  "creative_next_icon.png": {
+    "type": "transform",
+    "sources": {
+      "source": "assets/minecraft/textures/gui/resource_packs.png",
+      "cropW": 0.0546875,
+      "cropX": 0.0390625,
+      "cropY": 0.01953125,
+      "cropH": 0.0859375,
+      "isProportional": true
+    }
+  },
+  "creative_prev_icon.png": {
+    "type": "transform",
+    "sources": {
+      "source": "assets/minecraft/textures/gui/resource_packs.png",
+      "cropW": 0.0546875,
+      "cropX": 0.13671875,
+      "cropY": 0.01953125,
+      "cropH": 0.0859375,
+      "isProportional": true
+    }
+  },
+  "bubble.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/particle/bubble.png",
+      "isProportional": true
+    }
+  },
+  "flowers_waterlily_bottom.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/lily_pad.png",
+      "colorSourceType": "self",
+      "colorX": 0.31,
+      "colorY": 0.44,
+      "isProportional": true
+    }
+  },
+  "flowers_waterlily.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/lily_pad.png",
+      "colorSourceType": "self",
+      "colorX": 0.38,
+      "colorY": 0.56,
+      "isProportional": true
+    }
+  },
+  "default_acacia_leaves_simple.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/acacia_leaves.png",
+      "colorSourceType": "self",
+      "colorX": 0.69,
+      "colorY": 0.25,
+      "isProportional": true
+    }
+  },
+  "default_aspen_leaves.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/birch_leaves.png",
+      "colorSourceType": "self",
+      "colorX": 0.75,
+      "colorY": 0.69,
+      "isProportional": true
+    }
+  },
+  "default_desert_sandstone_brick.png": {
+    "type": "compose",
+    "sources": {
+      "baseImage": "assets/minecraft/textures/block/stone_bricks.png",
+      "topImage": "assets/minecraft/textures/block/sand.png",
+      "composeMode": "overlay",
+      "topOpacity": 1,
+      "isProportional": true
+    }
+  },
+  "default_grass_5.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/grass.png",
+      "colorSourceType": "self",
+      "colorX": 0.63,
+      "colorY": 0.75,
+      "isProportional": true
+    }
+  },
+  "default_silver_sandstone_brick.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/stone_bricks.png",
+      "colorSourceType": "self",
+      "colorX": 0.75,
+      "colorY": 0.63,
+      "colorizeBlendMode": "overlay",
+      "colorizeAlpha": 1,
+      "colorizeBrightness": 1,
+      "colorValue": "#da0707",
+      "isProportional": true
+    }
+  },
+  "default_dry_grass.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/grass_block_top.png",
+      "colorSourceType": "self",
+      "colorX": 0.44,
+      "colorY": 0.69,
+      "colorizeBlendMode": "color",
+      "isProportional": true
+    }
+  },
+  "default_tool_bronzesword.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/golden_sword.png",
+      "colorSourceType": "self",
+      "colorX": 0.5,
+      "colorY": 0.38,
+      "isProportional": true,
+      "enableColorReplace": false,
+      "replaceColors": [],
+      "hueTolerance": 9
+    }
+  },
+  "default_tin_ingot.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/iron_ingot.png",
+      "colorSourceType": "self",
+      "colorX": 0.56,
+      "colorY": 0.56,
+      "isProportional": true
+    }
+  },
+  "doors_door_wood.png": {
+    "type": "compose_door",
+    "sources": {
+      "lower": "assets/minecraft/textures/block/oak_door_bottom.png",
+      "upper": "assets/minecraft/textures/block/oak_door_top.png",
+      "isProportional": true
+    }
+  },
+  "default_chest_top.png": {
+    "type": "create_chest",
+    "sources": {
+      "source": "assets/minecraft/textures/entity/chest/normal.png",
+      "chestPart": "top",
+      "isProportional": true
+    }
+  },
+  "default_chest_front.png": {
+    "type": "create_chest",
+    "sources": {
+      "source": "assets/minecraft/textures/entity/chest/normal.png",
+      "chestPart": "front",
+      "isProportional": true
+    }
+  },
+  "default_chest_side.png": {
+    "type": "create_chest",
+    "sources": {
+      "source": "assets/minecraft/textures/entity/chest/normal.png",
+      "chestPart": "side",
+      "isProportional": true
+    }
+  },
+  "carts_rail_crossing_pwr.png": {
+    "type": "montage",
+    "sources": {
+      "parts": [
+        {
+          "source": "assets/minecraft/textures/block/powered_rail_on.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 1,
+          "sh": 1,
+          "dx": 0,
+          "dy": 0,
+          "rotate": 0
+        },
+        {
+          "source": "assets/minecraft/textures/block/powered_rail_on.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 1,
+          "sh": 1,
+          "dx": 0,
+          "dy": 0,
+          "rotate": 270
+        }
+      ],
+      "canvasW": 0,
+      "canvasH": 0,
+      "isProportional": true
+    }
+  },
+  "carts_rail_crossing.png": {
+    "type": "montage",
+    "sources": {
+      "parts": [
+        {
+          "source": "assets/minecraft/textures/block/rail.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 1,
+          "sh": 1,
+          "dx": 0,
+          "dy": 0,
+          "rotate": 0
+        },
+        {
+          "source": "assets/minecraft/textures/block/rail.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 1,
+          "sh": 1,
+          "dx": 0,
+          "dy": 0,
+          "rotate": 270
+        },
+        {
+          "source": "assets/minecraft/textures/block/rail.png",
+          "sx": 0,
+          "sy": 0,
+          "sw": 1,
+          "sh": 1,
+          "dx": 0.375,
+          "dy": -6,
+          "rotate": 90
+        }
+      ],
+      "canvasW": 0,
+      "canvasH": 1,
+      "isProportional": true
+    }
+  },
+  "default_copper_block.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/iron_block.png",
+      "colorSourceType": "self",
+      "colorValue": "#ca8654",
+      "colorX": 0.5,
+      "colorY": 0.63,
+      "isProportional": true
+    }
+  },
+  "bucket_river_water.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/water_bucket.png",
+      "colorSourceType": "self",
+      "colorX": 0.44,
+      "colorY": 0.25,
+      "enableColorReplace": true,
+      "replaceColorValue": "#2e58d3",
+      "replaceTolerance": 121,
+      "colorizeBrightness": 2.95,
+      "replaceColors": [
+        {
+          "color": "#455780"
+        },
+        {
+          "color": "#2b9af8"
+        },
+        {
+          "color": "#2b9af8"
+        }
+      ],
+      "hueTolerance": 99,
+      "minSaturation": 0.09,
+      "isProportional": true
+    }
+  },
+  "carts_rail_straight_brk.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/powered_rail_on.png",
+      "colorSourceType": "specific_color",
+      "colorValue": "#ff0000",
+      "enableColorReplace": true,
+      "replaceColors": [
+        {
+          "color": "#dcae29",
+          "tolerance": 61
+        }
+      ],
+      "colorizeBrightness": 1,
+      "isProportional": true,
+      "minSaturation": 0.49
+    }
+  },
+  "default_coral_cyan.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/horn_coral.png",
+      "colorSourceType": "self",
+      "colorX": 0.56,
+      "colorY": 0.56,
+      "isProportional": true
+    }
+  },
+  "default_apple.png": {
+    "type": "rename",
+    "sources": {
+      "source": "assets/minecraft/textures/item/apple.png",
+      "isProportional": true
+    }
+  },
+  "carts_rail_crossing_brk.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "generated/generated_carts_rail_crossing_pwr.png",
+      "colorSourceType": "self",
+      "colorX": 11,
+      "colorY": 1,
+      "enableColorReplace": true,
+      "replaceColors": [
+        {
+          "color": "#f3c12a",
+          "tolerance": 84
+        }
+      ],
+      "isProportional": true
+    }
+  },
+  "default_coral_green.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/brain_coral.png",
+      "colorSourceType": "self",
+      "colorX": 0.63,
+      "colorY": 0.56,
+      "isProportional": true,
+      "colorizeBlendMode": "multiply"
+    }
+  },
+  "default_desert_stone_brick.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/stone_bricks.png",
+      "colorSourceType": "self",
+      "colorX": 0.06,
+      "colorY": 0,
+      "colorizeBlendMode": "multiply",
+      "isProportional": true
+    }
+  },
+  "default_desert_stone.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/stone.png",
+      "colorSourceType": "self",
+      "colorX": 0.63,
+      "colorY": 0.06,
+      "colorizeBlendMode": "multiply",
+      "isProportional": true,
+      "colorizeBrightness": 1.4
+    }
+  },
+  "default_dry_grass_5.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/grass.png",
+      "colorSourceType": "self",
+      "colorX": 0.81,
+      "colorY": 0.69,
+      "colorizeBlendMode": "overlay",
+      "isProportional": true,
+      "colorizeBrightness": 0.95
+    }
+  },
+  "default_dry_grass_side.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/grass_block_side_overlay.png",
+      "colorSourceType": "self",
+      "colorX": 0.44,
+      "colorY": 0.13,
+      "colorizeBlendMode": "overlay",
+      "isProportional": true
+    }
+  },
+  "dye_dark_grey.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/black_dye.png",
+      "colorizeAlpha": 1,
+      "colorSourceType": "self",
+      "colorX": 0.5,
+      "colorY": 0.56,
+      "colorizeBrightness": 3,
+      "colorizeBlendMode": "overlay",
+      "isProportional": true
+    }
+  },
+  "farming_tool_bronzehoe.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/golden_hoe.png",
+      "colorSourceType": "self",
+      "colorX": 0.63,
+      "colorY": 0.25,
+      "enableColorReplace": true,
+      "replaceColors": [
+        {
+          "color": "#eaee57"
+        }
+      ],
+      "hueTolerance": 100,
+      "isProportional": true
+    }
+  },
+  "wool_violet.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/red_wool.png",
+      "colorSourceType": "self",
+      "colorX": 0.56,
+      "colorY": 0.19,
+      "colorizeBlendMode": "overlay",
+      "colorizeBrightness": 1.55,
+      "isProportional": true
+    }
+  },
+  "wool_dark_grey.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/gray_wool.png",
+      "colorizeBrightness": 1,
+      "colorSourceType": "self",
+      "colorX": 0.5,
+      "colorY": 0.56,
+      "colorizeAlpha": 0.59,
+      "colorizeBlendMode": "overlay",
+      "isProportional": true
+    }
+  },
+  "vessels_steel_bottle.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/glass_bottle.png",
+      "colorSourceType": "self",
+      "colorX": 0.63,
+      "colorY": 0.63,
+      "isProportional": true
+    }
+  },
+  "default_water_flowing_animated.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/water_flow.png",
+      "colorizeBlendMode": "color",
+      "colorSourceType": "self",
+      "colorX": 0.06,
+      "colorY": 0.99,
+      "isProportional": true,
+      "colorizeBrightness": 1.05
+    }
+  },
+  "default_tool_bronzeshovel.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/golden_shovel.png",
+      "colorSourceType": "self",
+      "colorX": 0.69,
+      "colorY": 0.13,
+      "isProportional": true,
+      "enableColorReplace": true,
+      "replaceColors": [
+        {
+          "color": "#edef6b"
+        }
+      ],
+      "minSaturation": 0.1,
+      "hueTolerance": 92
+    }
+  },
+  "default_jungleleaves.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/block/jungle_leaves.png",
+      "colorSourceType": "minecraft",
+      "colorSource": "assets/minecraft/textures/colormap/foliage.png",
+      "colorX": 0.9453125,
+      "colorY": 0.859375,
+      "isProportional": true
+    }
+  },
+  "default_tool_bronzepick.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/golden_pickaxe.png",
+      "colorSourceType": "self",
+      "colorX": 0.8125,
+      "colorY": 0.4375,
+      "enableColorReplace": true,
+      "replaceColors": [
+        {
+          "color": "#eaee57"
+        }
+      ],
+      "isProportional": true
+    }
+  },
+  "default_tool_bronzeaxe.png": {
+    "type": "colorize",
+    "sources": {
+      "base": "assets/minecraft/textures/item/golden_axe.png",
+      "colorSourceType": "self",
+      "colorX": 0.5625,
+      "colorY": 0.25,
+      "enableColorReplace": true,
+      "replaceColors": [
+        {
+          "color": "#fdff76"
+        },
+        {
+          "color": "#e9b115"
+        }
+      ],
+      "isProportional": true
+    }
+  }
+}
