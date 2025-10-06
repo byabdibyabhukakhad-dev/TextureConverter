@@ -1,0 +1,3155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="pageTitle">Texture Dönüştürme Stüdyosu v56 (Taşınabilir Ara Dokular)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .drop-zone { border: 2px dashed #9ca3af; transition: all 0.3s ease; }
+        .drop-zone.dragover { border-color: #4f46e5; background-color: #eef2ff; }
+        .texture-list-item:hover, .quick-match-item:hover { background-color: #f3f4f6; }
+        .modal-bg { background-color: rgba(0,0,0,0.5); }
+        .spinner { border-top-color: #4f46e5; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px;}
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .sticky-header { position: sticky; top: 0; background-color: white; z-index: 10; }
+        .rule-set-item.selected { background-color: #eef2ff; border-color: #c7d2fe; }
+        .rule-set-item.active-set { background-color: #f0fdf4; }
+        .rule-set-item.selected.active-set { background-color: #dcfce7; }
+        .method-input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.5rem; }
+        .interactive-preview-container { position: relative; cursor: crosshair; }
+        .crop-box { position: absolute; border: 1px solid rgba(255, 0, 0, 0.7); background-color: rgba(255, 0, 0, 0.2); box-sizing: border-box; pointer-events: none; }
+        .checkerboard {
+            background-image:
+                linear-gradient(45deg, #ddd 25%, transparent 25%),
+                linear-gradient(135deg, #ddd 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #ddd 75%),
+                linear-gradient(135deg, transparent 75%, #ddd 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 8px 0, 8px -8px, 0px 8px;
+        }
+        #previewContainer > .relative {
+             transform-origin: top left;
+        }
+        input[type='number']::-webkit-inner-spin-button,
+        input[type='number']::-webkit-outer-spin-button {
+            -webkit-appearance: inner-spin-button;
+            opacity: 1;
+        }
+        .quick-match-item.selected { background-color: #e0e7ff; border-left: 4px solid #4f46e5; }
+        .quick-match-item.matched { background-color: #dcfce7; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <div class="relative container mx-auto p-4 max-w-7xl">
+         <div class="lang-switcher absolute top-4 right-4 z-20 flex items-center text-sm font-bold">
+            <button data-lang="tr" class="px-3 py-2 rounded-l-lg transition-colors">TR</button>
+            <button data-lang="en" class="px-3 py-2 rounded-r-lg transition-colors">EN</button>
+        </div>
+        
+        <!-- Yükleme Ekranı -->
+        <div id="uploadView">
+             <div class="text-center bg-white p-6 rounded-xl shadow-md mb-4 pt-12">
+                <h1 class="text-3xl md:text-4xl font-bold text-slate-900" data-lang-key="mainTitle"></h1>
+                <p class="mt-2 text-slate-600" data-lang-key="mainSubtitle"></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-xl font-bold text-center mb-4" data-lang-key="uploadMcTitle"></h2>
+                    <div id="dropZoneMc" class="drop-zone rounded-lg p-8 text-center cursor-pointer">
+                        <i class="fas fa-file-image text-4xl text-slate-400 mb-2"></i>
+                        <p class="font-semibold" data-lang-key="uploadMcDrop"></p>
+                    </div>
+                    <input type="file" id="fileInputMc" class="hidden" accept=".zip">
+                    <p id="statusMc" class="text-center mt-2 h-6 text-slate-600 font-medium"></p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-xl font-bold text-center mb-4" data-lang-key="uploadMtTitle"></h2>
+                    <div id="dropZoneMt" class="drop-zone rounded-lg p-8 text-center cursor-pointer">
+                        <i class="fas fa-file-zipper text-4xl text-slate-400 mb-2"></i>
+                        <p class="font-semibold" data-lang-key="uploadMtDrop"></p>
+                    </div>
+                    <input type="file" id="fileInputMt" class="hidden" accept=".zip">
+                    <p id="statusMt" class="text-center mt-2 h-6 text-slate-600 font-medium"></p>
+                </div>
+            </div>
+             <p id="initialAnalysisStatus" class="text-center mt-4 h-6 text-indigo-600 font-semibold"></p>
+        </div>
+
+        <!-- Eşleştirme Ekranı -->
+        <div id="mapperView" class="hidden mt-4">
+            <div class="bg-white rounded-xl shadow-md flex flex-col">
+                <!-- Üst Kontrol Paneli -->
+                <div class="p-3 border-b flex-shrink-0">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-3">
+                         <div class="flex items-center gap-3">
+                            <h1 class="text-xl font-bold text-slate-900" data-lang-key="mapperTitle"></h1>
+                            <p id="convertStatus" class="h-6 text-sm text-slate-600 font-medium flex items-center"></p>
+                         </div>
+                        <div class="flex items-center gap-2">
+                            <button id="newConversionButton" data-lang-key="newConversion" class="bg-blue-600 text-white font-bold py-1 px-3 text-sm rounded-lg hover:bg-blue-700 transition-colors"></button>
+                            <button id="quickMatchButton" data-lang-key="quickMatch" class="bg-teal-600 text-white font-bold py-1 px-3 text-sm rounded-lg hover:bg-teal-700 transition-colors"></button>
+                            <button id="manageRuleSetsButton" data-lang-key="manageRuleSets" class="bg-slate-200 text-slate-700 font-bold py-1 px-3 text-sm rounded-lg hover:bg-slate-300 transition-colors"></button>
+                            <button id="convertButton" data-lang-key="convertAndDownload" class="bg-green-600 text-white font-bold py-1 px-3 text-sm rounded-lg hover:bg-green-700 transition-colors"></button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Ana İçerik Alanı -->
+                <div class="flex flex-col gap-4 p-4">
+                    <div class="flex flex-col border rounded-lg">
+                        <div id="mappedListHeader" class="sticky-header p-2 border-b cursor-pointer hover:bg-slate-50">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-grow">
+                                   <h4 class="font-bold text-slate-600" data-lang-key="mappedTexturesTitle"></h4>
+                                   <p class="text-xs text-slate-500 mt-1" data-lang-key="mappedTexturesSubtitle"></p>
+                                </div>
+                                <div class="ml-auto flex items-center gap-2">
+                                     <button id="saveAllSessionButton" class="hidden bg-indigo-100 text-indigo-700 font-bold py-1 px-2 text-xs rounded-lg hover:bg-indigo-200 transition-colors" data-lang-key="saveAllButton"></button>
+                                     <span class="text-slate-400 text-lg"><i class="fas fa-chevron-up"></i></span>
+                                </div>
+                           </div>
+                           <input type="text" id="searchMapped" data-lang-key-placeholder="searchMapped" class="w-full p-2 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500 mt-2">
+                        </div>
+                        <ul id="mappedList" class="custom-scrollbar overflow-y-auto p-1 h-80"></ul>
+                    </div>
+                    <div class="flex flex-col border rounded-lg">
+                         <div id="unmappedListHeader" class="sticky-header p-2 border-b cursor-pointer hover:bg-slate-50">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-slate-800 flex-grow" data-lang-key="unmappedTexturesTitle"></h4>
+                                <span class="text-slate-400 text-lg"><i class="fas fa-chevron-up"></i></span>
+                            </div>
+                            <input type="text" id="searchUnmapped" data-lang-key-placeholder="searchUnmapped" class="w-full p-2 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500 mt-2">
+                         </div>
+                        <ul id="unmappedList" class="overflow-y-auto custom-scrollbar p-1 h-80"></ul>
+                    </div>
+                </div>
+                 <div class="p-2 border-t flex-shrink-0">
+                    <button id="clearStorageButton" class="w-full text-xs text-red-600 hover:text-red-800 transition-colors" data-lang-key="clearStorageButton">
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hızlı Eşleştirme Ekranı -->
+        <div id="quickMatchView" class="hidden mt-4">
+            <div class="bg-white rounded-xl shadow-md flex flex-col h-[90vh]">
+                <div class="p-3 border-b flex justify-between items-center flex-shrink-0">
+                    <h1 class="text-xl font-bold text-slate-900" data-lang-key="quickMatchTitle"></h1>
+                    <button id="saveAndCloseQuickMatch" class="bg-indigo-600 text-white font-bold py-1 px-3 text-sm rounded-lg hover:bg-indigo-700 transition-colors" data-lang-key="saveAndClose"></button>
+                </div>
+                <div class="grid grid-cols-2 gap-0 flex-grow overflow-hidden">
+                    <!-- Sol Sütun -->
+                    <div class="flex flex-col border-r overflow-hidden">
+                        <div class="p-2 border-b flex-shrink-0">
+                            <input type="text" id="quickMatchSearchMt" class="w-full p-2 border rounded-lg text-sm" data-lang-key-placeholder="searchTarget">
+                        </div>
+                        <ul id="quickMatchMtList" class="custom-scrollbar overflow-y-auto p-1 flex-grow"></ul>
+                    </div>
+                    <!-- Sağ Sütun -->
+                    <div class="flex flex-col overflow-hidden">
+                        <div class="p-2 border-b flex-shrink-0">
+                            <input type="text" id="quickMatchSearchMc" class="w-full p-2 border rounded-lg text-sm" data-lang-key-placeholder="searchSource">
+                            <div id="quickMatchSuggestionWeights" class="grid grid-cols-3 gap-3 pt-2 text-xs">
+                                <div>
+                                    <label for="quickMatchColorSlider" class="block font-medium text-center text-teal-600" data-lang-key="colorWeight"></label>
+                                    <input type="range" id="quickMatchColorSlider" min="0" max="1" step="0.05" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                                <div>
+                                    <label for="quickMatchStructureSlider" class="block font-medium text-center text-indigo-600" data-lang-key="structureWeight"></label>
+                                    <input type="range" id="quickMatchStructureSlider" min="0" max="1" step="0.05" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                                <div>
+                                    <label for="quickMatchNameSlider" class="block font-medium text-center text-amber-600" data-lang-key="nameWeight"></label>
+                                    <input type="range" id="quickMatchNameSlider" min="0" max="1" step="0.05" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+                        <ul id="quickMatchMcList" class="custom-scrollbar overflow-y-auto p-1 flex-grow"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Kural Setleri Modalı -->
+    <div id="ruleSetModal" class="fixed inset-0 modal-bg hidden items-center justify-center p-4 z-[9999]">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center flex-shrink-0">
+                <h3 class="font-bold text-lg" data-lang-key="ruleSetManagerTitle"></h3>
+                <button id="closeRuleSetModal" class="text-2xl text-slate-400 hover:text-slate-800">&times;</button>
+            </div>
+            <div class="flex flex-col md:flex-row flex-grow overflow-hidden">
+                <div class="w-full md:w-1/3 p-4 border-b md:border-b-0 md:border-r flex flex-col">
+                    <div class="flex-shrink-0">
+                        <h4 class="font-semibold text-sm mb-2" data-lang-key="addNewSet"></h4>
+                        <div class="flex gap-2 mb-4">
+                            <input type="text" id="newRuleSetName" class="flex-grow p-2 border rounded-lg text-sm" data-lang-key-placeholder="newSetNamePlaceholder">
+                            <button id="addRuleSetButton" class="bg-indigo-600 text-white font-bold px-4 rounded-lg hover:bg-indigo-700 text-sm flex-shrink-0"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+    
+                    <div class="flex-grow flex flex-col overflow-y-auto custom-scrollbar">
+                        <div>
+                            <h4 class="font-semibold text-sm mb-2" data-lang-key="existingSets"></h4>
+                            <ul id="ruleSetList" class="space-y-2"></ul>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4 mt-auto border-t flex-shrink-0">
+                        <button id="importRuleSetButton" class="w-full bg-slate-200 text-slate-700 font-bold py-2 px-3 text-sm rounded-lg hover:bg-slate-300 transition-colors" data-lang-key="importSetButton"></button>
+                        <input type="file" id="importRuleSetInput" class="hidden" accept=".json">
+                    </div>
+                </div>
+                <div class="w-full md:w-2/3 p-4 flex flex-col overflow-hidden">
+                    <div class="flex-shrink-0 mb-2 flex justify-between items-center">
+                        <h4 id="ruleSetContentHeader" class="font-bold text-slate-800"></h4>
+                        <input type="text" id="searchRuleSet" class="p-2 border rounded-lg text-sm" data-lang-key-placeholder="searchRuleSet" style="display: none;">
+                    </div>
+                    <div id="ruleSetContentContainer" class="overflow-y-auto custom-scrollbar flex-grow">
+                        <div id="ruleSetContent">
+                             <p class="text-slate-500 text-sm" data-lang-key="selectSetPrompt"></p>
+                        </div>
+                        <div id="generatedContent" class="mt-4 pt-4 border-t">
+                             <h4 class="font-semibold text-sm mb-2" data-lang-key="generatedTexturesTitle"></h4>
+                             <ul id="generatedTextureList" class="space-y-2"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Eşleştirme Modalı -->
+    <div id="mappingModal" class="fixed inset-0 modal-bg hidden items-center justify-center p-4 z-[9999]">
+         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center flex-shrink-0">
+                <h3 class="font-bold text-lg" data-lang-key="mappingPanelTitle"></h3>
+                <button id="closeModal" class="text-2xl text-slate-400 hover:text-slate-800">&times;</button>
+            </div>
+            <div class="flex-grow overflow-y-auto custom-scrollbar">
+                <div class="flex flex-col md:flex-row">
+                    <div class="w-full md:w-1/3 p-4 border-b md:border-b-0 md:border-r flex flex-col gap-4">
+                        <div>
+                            <p class="font-semibold text-sm text-slate-600" data-lang-key="targetTexture"></p>
+                            <div class="flex items-center gap-2 p-2 bg-slate-100 rounded-md mt-1">
+                                <img id="modalMtImage" class="w-8 h-8 object-contain rounded">
+                                <div class="flex-grow">
+                                     <span id="modalMtName" class="font-mono text-sm break-all"></span>
+                                     <span id="modalMtResolution" class="text-xs text-slate-500 block"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="methodSelector" class="font-semibold text-sm text-slate-600" data-lang-key="conversionMethod"></label>
+                            <select id="methodSelector" class="w-full p-2 mt-1 border rounded-md bg-white"></select>
+                        </div>
+                        <div id="methodInputs" class="flex-grow flex flex-col gap-3"></div>
+                         <div class="mt-auto pt-4" id="livePreviewContainer">
+                             <p class="font-semibold text-sm text-slate-600 mb-2" data-lang-key="livePreview"></p>
+                             <div id="previewContainer" class="w-full h-32 bg-slate-200 rounded-md flex items-center justify-center overflow-auto custom-scrollbar relative">
+                                 <div class="relative checkerboard bg-gray-100">
+                                     <img id="previewOverlayImage" class="absolute top-0 left-0 pointer-events-none hidden" style="image-rendering: pixelated; z-index: 1;">
+                                     <img id="previewImage" class="block max-w-none max-h-none relative" style="image-rendering: pixelated; z-index: 2;">
+                                 </div>
+                             </div>
+                             <div class="mt-2">
+                                <label for="previewZoom" class="text-xs text-slate-500" data-lang-key="zoom"></label>
+                                <input type="range" id="previewZoom" min="0.2" max="20" value="1" step="0.1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                             </div>
+                             <div class="grid grid-cols-2 gap-2 mt-4">
+                                <button id="clearSessionMappingButton" class="w-full bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600" data-lang-key="clearSessionMappingButton"></button>
+                                <button id="cloneMappingButton" class="w-full bg-teal-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-teal-600" data-lang-key="cloneMappingButton"></button>
+                                <button id="saveAsNewTextureButton" class="w-full bg-lime-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-lime-700" data-lang-key="saveAsNewTextureButton"></button>
+                                <button id="saveMappingButton" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700" data-lang-key="saveChangesButton"></button>
+                             </div>
+                        </div>
+                    </div>
+                    <div class="flex-grow p-4 flex flex-col">
+                        <div id="suggestionContainer" class="flex-shrink-0">
+                            <details class="border rounded-md" open>
+                                <summary class="p-2 font-semibold cursor-pointer" data-lang-key="suggestedSources"></summary>
+                                <div class="p-2 border-t">
+                                    <div id="suggestionWeights" class="grid grid-cols-3 gap-3 mb-2 text-xs">
+                                        <div>
+                                            <label for="colorSlider" class="block font-medium text-center text-teal-600" data-lang-key="colorWeight"></label>
+                                            <input type="range" id="colorSlider" min="0" max="1" step="0.05" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                        </div>
+                                        <div>
+                                            <label for="structureSlider" class="block font-medium text-center text-indigo-600" data-lang-key="structureWeight"></label>
+                                            <input type="range" id="structureSlider" min="0" max="1" step="0.05" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                        </div>
+                                        <div>
+                                            <label for="nameSlider" class="block font-medium text-center text-amber-600" data-lang-key="nameWeight"></label>
+                                            <input type="range" id="nameSlider" min="0" max="1" step="0.05" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                        </div>
+                                    </div>
+                                    <ul id="suggestionList" class="border rounded-md p-1 max-h-48 overflow-y-auto custom-scrollbar"></ul>
+                                </div>
+                            </details>
+                        </div>
+                        <button id="showAllMcButton" class="mt-4 w-full text-indigo-600 font-semibold py-2 rounded-lg hover:bg-indigo-50 transition-colors flex-shrink-0" data-lang-key="showAllButton"></button>
+                        <div id="allMcContainer" class="mt-4 flex-grow flex flex-col overflow-y-hidden hidden">
+                             <p id="allMcHeader" class="mb-2 font-semibold"></p>
+                             <input type="text" id="modalSearchInput" class="w-full p-2 border rounded-lg mb-2 flex-shrink-0" data-lang-key-placeholder="searchSourceTextures">
+                             <ul id="modalAllMcList" class="overflow-y-auto custom-scrollbar border rounded-md p-1 flex-grow h-64"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Kural Seti Kaydetme Modalı -->
+    <div id="saveModal" class="fixed inset-0 modal-bg hidden items-center justify-center p-4 z-[9999]">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col">
+            <div class="p-4 border-b">
+                <h3 id="saveModalTitle" class="font-bold text-lg" data-lang-key="saveToSetTitle"></h3>
+            </div>
+            <div class="p-4 space-y-4">
+                <p id="saveModalMessage" class="text-sm text-slate-600"></p>
+                <div>
+                    <label for="saveSetSelector" class="font-semibold text-sm text-slate-700" data-lang-key="targetSetLabel"></label>
+                    <select id="saveSetSelector" class="w-full p-2 mt-1 border rounded-md bg-white"></select>
+                </div>
+            </div>
+            <div class="p-4 border-t flex justify-end gap-2">
+                <button id="cancelSaveButton" class="bg-slate-200 text-slate-700 font-bold py-2 px-4 text-sm rounded-lg hover:bg-slate-300" data-lang-key="cancelButton"></button>
+                <button id="confirmSaveButton" class="bg-indigo-600 text-white font-bold py-2 px-4 text-sm rounded-lg hover:bg-indigo-700" data-lang-key="saveButton"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onay Modalı -->
+    <div id="confirmModal" class="fixed inset-0 modal-bg hidden items-center justify-center p-4 z-[9999]">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col">
+            <div class="p-4">
+                 <h3 id="confirmTitleEl" class="font-bold text-lg" data-lang-key="confirmTitle"></h3>
+                 <p id="confirmMessage" class="text-sm text-slate-600 mt-2"></p>
+            </div>
+            <div class="p-4 border-t flex justify-end gap-2">
+                <button id="confirmNo" class="bg-slate-200 text-slate-700 font-bold py-2 px-4 text-sm rounded-lg hover:bg-slate-300" data-lang-key="cancelButton"></button>
+                <button id="confirmYes" class="bg-red-600 text-white font-bold py-2 px-4 text-sm rounded-lg hover:bg-red-700" data-lang-key="deleteButton"></button>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+// --- GLOBAL STATE & CONSTANTS ---
+const ANALYSIS_SIZE = 16; // Standard size for all texture analysis
+const THUMBNAIL_SIZE = 16; // For UI lists
+const translations = {
+    tr: {
+        pageTitle: "Texture Dönüştürme Stüdyosu v56",
+        mainTitle: "Texture Dönüştürme Stüdyosu",
+        mainSubtitle: "Minecraft doku paketlerinizi Minetest için görsel olarak eşleştirin ve dönüştürün.",
+        uploadMcTitle: "1. Minecraft Paketini Yükle (Kaynak)",
+        uploadMcDrop: "Minecraft.zip dosyasını sürükleyin",
+        uploadMtTitle: "2. Minetest Paketini Yükle (Hedef)",
+        uploadMtDrop: "Minetest.zip dosyasını sürükleyin",
+        mapperTitle: "Dönüştürme Stüdyosu",
+        manageRuleSets: "Kurallar",
+        newConversion: "Yeni",
+        quickMatch: "Hızlı Eşleştir",
+        quickMatchTitle: "Hızlı Eşleştirme Modu",
+        quickMatchPrompt: "Öneri görmek için soldan bir hedef doku seçin.",
+        calculatingSuggestions: "Öneriler hesaplanıyor...",
+        suggestionError: "Öneriler hesaplanırken hata oluştu.",
+        noResultsFound: "Eşleşen kaynak doku bulunamadı.",
+        advancedEditTooltip: "Gelişmiş Düzenleme",
+        saveAndClose: "Kaydet ve Kapat",
+        searchTarget: "Hedef doku ara...",
+        searchSource: "Kaynak doku ara...",
+        convertAndDownload: "Dönüştür",
+        mappedTexturesTitle: 'Eşleştirilmiş Dokular (<span id="mappedCount">0</span>)',
+        mappedTexturesSubtitle: '<i class="fas fa-check-circle text-green-500"></i>: Kaydedilmiş | <i class="fas fa-save text-orange-500"></i>: Geçici (Kaydedilmemiş)',
+        saveAllButton: '<i class="fas fa-save mr-1"></i> Tümünü Kaydet...',
+        unmappedTexturesTitle: 'Eşleştirilecek Dokular (<span id="unmappedCount">0</span>)',
+        searchUnmapped: "Eşleştirilecek dokularda ara...",
+        searchMapped: "Eşleşmiş dokularda ara...",
+        searchRuleSet: "Kurallarda ara...",
+        clearStorageButton: '<i class="fas fa-trash-alt mr-1"></i> Tarayıcıda Kayıtlı Tüm Verileri Temizle',
+        ruleSetManagerTitle: "Kural Seti Yöneticisi",
+        addNewSet: "Yeni Kural Seti Ekle",
+        newSetNamePlaceholder: "Yeni kural seti adı...",
+        existingSets: "Mevcut Setler",
+        generatedTexturesTitle: "Oluşturulmuş Ara Dokular",
+        importSetButton: '<i class="fas fa-upload mr-1"></i>Set İçe Aktar',
+        selectSetPrompt: "Bir set seçerek içeriğini görüntüleyin.",
+        mappingPanelTitle: "Doku Eşleştirme Paneli",
+        targetTexture: "Hedef Minetest Dokusu:",
+        conversionMethod: "Dönüştürme Yöntemi:",
+        livePreview: "Canlı Önizleme:",
+        zoom: "Boyut:",
+        clearSessionMappingButton: "Geçici Eşleşmeyi Temizle",
+        saveChangesButton: "Değişiklikleri Kaydet...",
+        cloneMappingButton: '<i class="fas fa-clone mr-1"></i> Klonla',
+        saveAsNewTextureButton: '<i class="fas fa-plus-square mr-1"></i> Kalıcı Yeni Doku Olarak Kaydet',
+        suggestedSources: "Önerilen Kaynaklar",
+        colorWeight: "Renk",
+        structureWeight: "Yapı",
+        nameWeight: "İsim",
+        showAllButton: 'Tümünü Göster/Ara <i class="fas fa-chevron-down ml-1"></i>',
+        hideButton: 'Gizle <i class="fas fa-chevron-up ml-1"></i>',
+        searchSourceTextures: "Kaynak dokularda ara...",
+        saveToSetTitle: "Kural Setine Kaydet",
+        saveGeneratedToSetTitle: "Ara Dokuyu Kural Setine Kaydet",
+        targetSetLabel: "Hedef Kural Seti:",
+        cancelButton: "İptal",
+        saveButton: "Kaydet",
+        confirmTitle: "Emin misiniz?",
+        confirmNewConversionTitle: "Yeni Dönüştürme Başlat?",
+        deleteButton: "Sil",
+        cloningStatus: "Klonlama modu aktif. Ana listeden yeni bir hedef doku seçin.",
+        statusLoaded: "{file} yüklendi.",
+        statusError: "Hata: {error}",
+        statusPleaseZip: "Lütfen bir .zip dosyası seçin.",
+        statusProcessing: "İşleniyor...",
+        statusZipping: "ZIP dosyası oluşturuluyor...",
+        statusDone: "Dönüştürme tamamlandı!",
+        statusZipError: "Hata: ZIP oluşturulamadı.",
+        statusNewTextureSaved: 'Ara doku "{fileName}" kural setine kaydedildi.',
+        statusAnalyzing: "Doku parmak izleri oluşturuluyor ({current}/{total})...",
+        statusScoring: "Benzerlik puanları hesaplanıyor...",
+        statusScoringProgress: "Benzerlik puanları hesaplanıyor ({current}/{total})...",
+        genericError: "Bir hata oluştu.",
+        noRuleSetAlert: "Önce bir kural seti oluşturmalısınız.",
+        selectRuleSetAlert: "Lütfen geçerli bir kural seti seçin.",
+        noSessionChangesAlert: "Kaydedilecek geçici eşleştirme bulunmuyor.",
+        noChangesAlert: "Kaydedilecek bir değişiklik yok.",
+        confirmClearSession: "Bu geçici eşleştirmeyi temizlemek istediğinize emin misiniz?",
+        confirmClearStorage: "Kaydedilmiş tüm kural setlerini ve oluşturulmuş dokuları tarayıcı hafızasından silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+        confirmDeleteSet: "'{setName}' kural setini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+        confirmDeleteMapping: "'{fileName}' eşleşmesini bu setten silmek istediğinize emin misiniz?",
+        confirmDeleteGenerated: "'{fileName}' ara dokusunu ve tarifini bu kural setinden kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+        confirmNewConversion: "Tüm kaydedilmemiş (geçici) eşleştirmeler temizlenecek. Devam etmek istiyor musunuz?",
+        noMappingsToExport: "Dışa aktarılacak eşleştirme bulunmuyor.",
+        ruleSetExistsAlert: "Bu isimde bir kural seti zaten var.",
+        importSuccess: "'{setName}' kural seti başarıyla içe aktarıldı.",
+        importError: "Geçersiz JSON dosyası: {error}",
+        allMcLabel: "Tüm Minecraft Dokuları",
+        allMtLabel: "Tüm Minetest Dokuları",
+        colorAlpha: "Renk Saydamlığı:",
+        colorBrightness: "Renk Parlaklığı:",
+        baseLayerOpacity: "Temel Katman Saydamlığı:",
+        topLayerOpacity: "Üst Katman Saydamlığı:",
+        enableColorReplace: "Sadece belirli bir rengi etkile",
+        colorToReplace: "Değiştirilecek Renk:",
+        hueTolerance: "Renk Tonu Toleransı:",
+        minSaturation: "Min Doygunluk:",
+        maxSaturation: "Maks Doygunluk:",
+        minLightness: "Min Parlaklık:",
+        maxLightness: "Maks Parlaklık:",
+        addColorButton: '<i class="fas fa-plus mr-1"></i> Renk Ekle',
+        colorizeBlendMode: "Renklendirme Modu:",
+        methodRename: "Basit Eşleştirme",
+        methodColorize: "Renklendir",
+        methodSaydamlastir: "Ton ile Saydamlaştır",
+        methodDoor: "Kapı Oluştur",
+        methodChest: "Sandık Oluştur",
+        methodCompose: "Katman Birleştirme",
+        methodTransform: "Gelişmiş Kırpma/Dönüştürme",
+        methodMontage: "Parçaları Birleştir (Montaj)",
+        methodLabelSource: "Kaynak Doku",
+        methodLabelTargetHue: "Hedef Ton (Hue)",
+        methodLabelChestSource: "Kaynak Sandık Haritası",
+        methodLabelChestPart: "Hedef Parça",
+        methodLabelDoorLower: "Kapı Alt Parça",
+        methodLabelDoorUpper: "Kapı Üst Parça",
+        methodLabelColorizeBase: "Ana Doku",
+        methodLabelColorizeSourceType: "Renk Kaynağı Türü",
+        methodLabelColorizeSource: "Renk Kaynağı Seç",
+        methodLabelColorizeColorValue: "Renk Değeri",
+        methodLabelComposeBase: "Temel Katman",
+        methodLabelComposeBaseSourceType: "Temel Katman Kaynağı",
+        methodLabelComposeTop: "Üst Katman",
+        methodLabelComposeTopSourceType: "Üst Katman Kaynağı",
+        methodLabelComposeMode: "Birleştirme Modu",
+        methodLabelTransformCropX: "Kırpma X Oranı:",
+        methodLabelTransformCropY: "Kırpma Y Oranı:",
+        methodLabelTransformCropW: "Genişlik Oranı:",
+        methodLabelTransformCropH: "Yükseklik Oranı:",
+        methodLabelTransformRotate: "Döndür (°)",
+        methodLabelOutputCanvasW: "Tuval Genişlik Oranı:",
+        methodLabelOutputCanvasH: "Tuval Yükseklik Oranı:",
+        methodLabelCanvasOffsetX: "Taşıma X (px)",
+        methodLabelCanvasOffsetY: "Taşıma Y (px)",
+        partTitle: "Parça {n}",
+        partSourceX: "Kaynak X Oranı:",
+        partSourceY: "Kaynak Y Oranı:",
+        partSourceW: "Genişlik Oranı:",
+        partSourceH: "Yükseklik Oranı:",
+        partDestX: "Hedef X Oranı:",
+        partDestY: "Hedef Y Oranı:",
+        partRotate: "Döndür (°)",
+        addPart: '<i class="fas fa-plus mr-1"></i> Parça Ekle',
+        showTargetOverlay: "Hedef dokuyu altta göster",
+        overlayOpacity: "Arkaplan Opaklığı:",
+    },
+    en: {
+        pageTitle: "Texture Conversion Studio v56",
+        mainTitle: "Texture Conversion Studio",
+        mainSubtitle: "Visually map and convert your Minecraft texture packs for Minetest.",
+        uploadMcTitle: "1. Upload Minecraft Pack (Source)",
+        uploadMcDrop: "Drag and drop Minecraft.zip file",
+        uploadMtTitle: "2. Upload Minetest Pack (Target)",
+        uploadMtDrop: "Drag and drop Minetest.zip file",
+        mapperTitle: "Conversion Studio",
+        manageRuleSets: "Rules",
+        newConversion: "New",
+        quickMatch: "Quick Match",
+        quickMatchTitle: "Quick Match Mode",
+        quickMatchPrompt: "Select a target texture on the left to see suggestions.",
+        calculatingSuggestions: "Calculating suggestions...",
+        suggestionError: "Error calculating suggestions.",
+        noResultsFound: "No matching source textures found.",
+        advancedEditTooltip: "Advanced Edit",
+        saveAndClose: "Save & Close",
+        searchTarget: "Search target textures...",
+        searchSource: "Search source textures...",
+        convertAndDownload: "Convert",
+        mappedTexturesTitle: 'Mapped Textures (<span id="mappedCount">0</span>)',
+        mappedTexturesSubtitle: '<i class="fas fa-check-circle text-green-500"></i>: Saved | <i class="fas fa-save text-orange-500"></i>: Session (Unsaved)',
+        saveAllButton: '<i class="fas fa-save mr-1"></i> Save All...',
+        unmappedTexturesTitle: 'Unmapped Textures (<span id="unmappedCount">0</span>)',
+        searchUnmapped: "Search unmapped textures...",
+        searchMapped: "Search mapped textures...",
+        searchRuleSet: "Search in rules...",
+        clearStorageButton: '<i class="fas fa-trash-alt mr-1"></i> Clear All Data from Browser Storage',
+        ruleSetManagerTitle: "Rule Set Manager",
+        addNewSet: "Add New Rule Set",
+        newSetNamePlaceholder: "New rule set name...",
+        existingSets: "Existing Sets",
+        generatedTexturesTitle: "Generated Intermediate Textures",
+        importSetButton: '<i class="fas fa-upload mr-1"></i>Import Set',
+        selectSetPrompt: "Select a set to view its contents.",
+        mappingPanelTitle: "Texture Mapping Panel",
+        targetTexture: "Target Minetest Texture:",
+        conversionMethod: "Conversion Method:",
+        livePreview: "Live Preview:",
+        zoom: "Zoom:",
+        clearSessionMappingButton: "Clear Session Mapping",
+        saveChangesButton: "Save Changes...",
+        cloneMappingButton: '<i class="fas fa-clone mr-1"></i> Clone',
+        saveAsNewTextureButton: '<i class="fas fa-plus-square mr-1"></i> Save as New Persistent Texture',
+        suggestedSources: "Suggested Sources",
+        colorWeight: "Color",
+        structureWeight: "Structure",
+        nameWeight: "Name",
+        showAllButton: 'Show/Search All <i class="fas fa-chevron-down ml-1"></i>',
+        hideButton: 'Hide <i class="fas fa-chevron-up ml-1"></i>',
+        searchSourceTextures: "Search source textures...",
+        saveToSetTitle: "Save to Rule Set",
+        saveGeneratedToSetTitle: "Save Intermediate Texture to Rule Set",
+        targetSetLabel: "Target Rule Set:",
+        cancelButton: "Cancel",
+        saveButton: "Save",
+        confirmTitle: "Are you sure?",
+        confirmNewConversionTitle: "Start New Conversion?",
+        deleteButton: "Delete",
+        cloningStatus: "Cloning mode active. Select a new target texture from the main list.",
+        statusLoaded: "{file} loaded.",
+        statusError: "Error: {error}",
+        statusPleaseZip: "Please select a .zip file.",
+        statusProcessing: "Processing...",
+        statusZipping: "Creating ZIP file...",
+        statusDone: "Conversion complete!",
+        statusZipError: "Error: Could not create ZIP.",
+        statusNewTextureSaved: 'Intermediate texture "{fileName}" saved to rule set.',
+        statusAnalyzing: "Analyzing textures ({current}/{total})...",
+        statusScoring: "Calculating similarity...",
+        statusScoringProgress: "Calculating similarity ({current}/{total})...",
+        genericError: "An error occurred.",
+        noRuleSetAlert: "You must create a rule set first.",
+        selectRuleSetAlert: "Please select a valid rule set.",
+        noSessionChangesAlert: "There are no session mappings to save.",
+        noChangesAlert: "There are no changes to save.",
+        confirmClearSession: "Are you sure you want to clear this session mapping?",
+        confirmClearStorage: "Are you sure you want to delete all saved rule sets and generated textures from browser storage? This action cannot be undone.",
+        confirmDeleteSet: "Are you sure you want to delete the rule set '{setName}'? This action cannot be undone.",
+        confirmDeleteMapping: "Are you sure you want to delete the mapping for '{fileName}' from this set?",
+        confirmDeleteGenerated: "Are you sure you want to permanently delete the intermediate texture '{fileName}' and its recipe from this rule set? This action cannot be undone.",
+        confirmNewConversion: "All unsaved (session) mappings will be cleared. Do you want to continue?",
+        noMappingsToExport: "There are no mappings to export.",
+        ruleSetExistsAlert: "A rule set with this name already exists.",
+        importSuccess: "'{setName}' rule set was imported successfully.",
+        importError: "Invalid JSON file: {error}",
+        allMcLabel: "All Minecraft Textures",
+        allMtLabel: "All Minetest Textures",
+        colorAlpha: "Color Opacity:",
+        colorBrightness: "Color Brightness:",
+        baseLayerOpacity: "Base Layer Opacity:",
+        topLayerOpacity: "Top Layer Opacity:",
+        enableColorReplace: "Only affect a specific color",
+        colorToReplace: "Color to Replace:",
+        hueTolerance: "Hue Tolerance:",
+        minSaturation: "Min Saturation:",
+        maxSaturation: "Max Saturation:",
+        minLightness: "Min Lightness:",
+        maxLightness: "Max Lightness:",
+        addColorButton: '<i class="fas fa-plus mr-1"></i> Add Color',
+        colorizeBlendMode: "Colorize Blend Mode:",
+        methodRename: "Simple Match",
+        methodColorize: "Colorize",
+        methodSaydamlastir: "Transparency by Hue",
+        methodDoor: "Create Door",
+        methodChest: "Create Chest",
+        methodCompose: "Compose Layers",
+        methodTransform: "Advanced Crop/Transform",
+        methodMontage: "Montage",
+        methodLabelSource: "Source Texture",
+        methodLabelTargetHue: "Target Hue",
+        methodLabelChestSource: "Source Chest Map",
+        methodLabelChestPart: "Target Part",
+        methodLabelDoorLower: "Door Lower Part",
+        methodLabelDoorUpper: "Door Upper Part",
+        methodLabelColorizeBase: "Base Texture",
+        methodLabelColorizeSourceType: "Color Source Type",
+        methodLabelColorizeSource: "Select Color Source",
+        methodLabelColorizeColorValue: "Color Value",
+        methodLabelComposeBase: "Base Layer",
+        methodLabelComposeBaseSourceType: "Base Layer Source",
+        methodLabelComposeTop: "Top Layer",
+        methodLabelComposeTopSourceType: "Top Layer Source",
+        methodLabelComposeMode: "Compositing Mode",
+        methodLabelTransformCropX: "Crop X Ratio:",
+        methodLabelTransformCropY: "Crop Y Ratio:",
+        methodLabelTransformCropW: "Width Ratio:",
+        methodLabelTransformCropH: "Height Ratio:",
+        methodLabelTransformRotate: "Rotate (°)",
+        methodLabelOutputCanvasW: "Canvas Width Ratio:",
+        methodLabelOutputCanvasH: "Canvas Height Ratio:",
+        methodLabelCanvasOffsetX: "Offset X (px)",
+        methodLabelCanvasOffsetY: "Offset Y (px)",
+        partTitle: "Part {n}",
+        partSourceX: "Source X Ratio:",
+        partSourceY: "Source Y Ratio:",
+        partSourceW: "Width Ratio:",
+        partSourceH: "Height Ratio:",
+        partDestX: "Dest. X Ratio:",
+        partDestY: "Dest. Y Ratio:",
+        partRotate: "Rotate (°)",
+        addPart: '<i class="fas fa-plus mr-1"></i> Add Part',
+        showTargetOverlay: "Show target texture overlay",
+        overlayOpacity: "Overlay Opacity:",
+    }
+};
+const chestRecipes = {
+  "inside": { "type": "montage", "sources": { "canvasW": 0.21875, "canvasH": 0.4375, "parts": [ { "sx": 0.4375, "sy": 0.296875, "sw": 0.21875, "sh": 0.21875, "dx": 0, "dy": 0 }, { "sx": 0.4375, "sy": 0.296875, "sw": 0.21875, "sh": 0.21875, "dx": 0, "dy": 0.21875 } ] } },
+  "top": { "type": "transform", "sources": { "cropX": 0.4375, "cropY": 0, "cropW": 0.21875, "cropH": 0.21875 } },
+  "front": { "type": "montage", "sources": { "canvasW": 0.21875, "canvasH": 0.21875, "parts": [ { "sx": 0.65625, "sy": 0.046875, "sw": 0.21875, "sh": 0.25, "dx": 0, "dy": 0, "rotate": 180 }, { "sx": 0.65625, "sy": 0.4375, "sw": 0.21875, "sh": 0.25, "dx": 0, "dy": 0.046875, "rotate": 180 }, { "sx": 0, "sy": 0.015625, "sw": 0.03125, "sh": 0.09375, "dx": 0.09375, "dy": 0.046875 }, { "sx": 0, "sy": 0, "sw": 0.015625, "sh": 0.015625, "dx": 0, "dy": 0 } ] } },
+  "side": { "type": "montage", "sources": { "canvasW": 0.21875, "canvasH": 0.21875, "parts": [ { "sx": 0, "sy": 0.125, "sw": 0.21875, "sh": 0.21875, "dx": 0, "dy": -0.09375 }, { "sx": 0, "sy": 0.5, "sw": 0.21875, "sh": 0.21875, "dx": 0, "dy": 0.046875 } ] } }
+};
+
+const defaultChestMappings = {
+    "default_chest_inside.png": { "type": "create_chest", "sources": { "source": "assets/minecraft/textures/entity/chest/normal.png", "chestPart": "inside" } },
+    "default_chest_top.png": { "type": "create_chest", "sources": { "source": "assets/minecraft/textures/entity/chest/normal.png", "chestPart": "top" } },
+    "default_chest_front.png": { "type": "create_chest", "sources": { "source": "assets/minecraft/textures/entity/chest/normal.png", "chestPart": "front" } },
+    "default_chest_side.png": { "type": "create_chest", "sources": { "source": "assets/minecraft/textures/entity/chest/normal.png", "chestPart": "side" } }
+};
+
+let mcTextures = [], mtTextures = [];
+let ruleSets = {};
+let sessionMappings = {}; 
+let quickMatchSessionMappings = {};
+let currentMtPath = null;
+let currentSourceInput = null;
+let selectedRuleSetForEditing = null;
+let currentQuickMatchMt = null;
+let lastScoredSources = [];
+let _saveContext = {};
+let _confirmCallback = null;
+let _clonedMapping = null;
+let isFirstPreviewLoad = true;
+let currentLang = localStorage.getItem('textureConverterLang') || 'tr';
+let analysisCache = new Map();
+let similarityMatrix = {};
+let _quickMatchUpdateCallback = null;
+let scoringWorker = null;
+
+
+// --- DOM Element References ---
+let uploadView, mapperView, convertButton, convertStatus, quickMatchButton, newConversionButton,
+    dropZoneMc, fileInputMc, statusMc, dropZoneMt, fileInputMt, statusMt,
+    initialAnalysisStatus,
+    manageRuleSetsButton, importRuleSetButton, importRuleSetInput, clearStorageButton,
+    ruleSetModal, closeRuleSetModal, ruleSetList, newRuleSetName, addRuleSetButton,
+    ruleSetContentHeader, ruleSetContent, searchRuleSet,
+    generatedTextureList,
+    searchUnmapped, searchMapped, unmappedList, mappedList, saveAllSessionButton,
+    unmappedListHeader, mappedListHeader,
+    quickMatchView, quickMatchSearchMt, quickMatchSearchMc, quickMatchMtList, quickMatchMcList, saveAndCloseQuickMatch,
+    quickMatchColorSlider, quickMatchStructureSlider, quickMatchNameSlider,
+    mappingModal, closeModal, modalMtImage, modalMtName, modalMtResolution, saveMappingButton,
+    methodSelector, methodInputs, suggestionContainer, suggestionList,
+    colorSlider, structureSlider, nameSlider,
+    allMcContainer, allMcHeader, showAllMcButton, modalSearchInput, modalAllMcList, clearSessionMappingButton, cloneMappingButton, saveAsNewTextureButton,
+    previewContainer, previewImage, previewZoom,
+    saveModal, saveModalTitle, saveModalMessage, saveSetSelector, confirmSaveButton, cancelSaveButton,
+    confirmModal, confirmTitleEl, confirmMessage, confirmYes, confirmNo;
+
+// --- UTILITY & HELPER FUNCTIONS ---
+const getFileName = (path) => path ? path.split('/').pop() : '';
+const findTextureByPath = (path, textureArray) => textureArray.find(t => t.path === path);
+const loadImage = (url) => new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = url;
+});
+const createThumbnail = (img) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = THUMBNAIL_SIZE;
+    canvas.height = THUMBNAIL_SIZE;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(img, 0, 0, THUMBNAIL_SIZE, THUMBNAIL_SIZE);
+    return canvas.toDataURL();
+};
+const rgbToHsl = (r, g, b) => {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+
+    if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return [ h * 360, s, l ]; // h: 0-360, s: 0-1, l: 0-1
+};
+const getImage = async (path) => {
+    if (!path) return null;
+    const allSourceTextures = [...mcTextures, ...mtTextures];
+    const texture = findTextureByPath(path, allSourceTextures);
+    return texture ? texture.img : null;
+};
+
+
+// --- LOCAL STORAGE MANAGEMENT ---
+const saveStateToLocal = () => {
+    try {
+        localStorage.setItem('textureConverterRuleSets', JSON.stringify(ruleSets));
+        const weights = {
+            color: colorSlider.value,
+            structure: structureSlider.value,
+            name: nameSlider.value
+        };
+        localStorage.setItem('textureConverterWeights', JSON.stringify(weights));
+    } catch (e) {
+        console.error("Failed to save state to localStorage:", e);
+    }
+};
+
+const loadStateFromLocal = () => {
+    const savedRules = localStorage.getItem('textureConverterRuleSets');
+    if (savedRules) {
+        try { 
+            const parsed = JSON.parse(savedRules);
+            // Migrate old structure
+            Object.keys(parsed).forEach(setName => {
+                if (!parsed[setName].generated) {
+                    parsed[setName].generated = {};
+                }
+            });
+            ruleSets = parsed;
+        } 
+        catch(e) { console.error("Error parsing rule sets", e); ruleSets = {}; }
+    }
+    if (Object.keys(ruleSets).length === 0) {
+        createNewRuleSet('Default', false);
+    }
+
+    const savedWeights = localStorage.getItem('textureConverterWeights');
+    if (savedWeights) {
+        try {
+            const weights = JSON.parse(savedWeights);
+            colorSlider.value = weights.color || 0.4;
+            structureSlider.value = weights.structure || 0.45;
+            nameSlider.value = weights.name || 0.15;
+        } catch(e) { console.error("Error parsing weights", e); }
+    } else {
+        colorSlider.value = 0.4;
+        structureSlider.value = 0.45;
+        nameSlider.value = 0.15;
+    }
+};
+
+const clearLocalStorage = () => {
+    localStorage.removeItem('textureConverterRuleSets');
+    localStorage.removeItem('textureConverterWeights');
+    ruleSets = {};
+    sessionMappings = {};
+    mcTextures = mcTextures.filter(t => !t.path.startsWith('generated/'));
+    loadStateFromLocal(); // Re-initializes with a default set and weights
+    renderRuleSets();
+    renderLists();
+};
+
+
+// --- I18N (INTERNATIONALIZATION) ---
+function setLanguage(lang) {
+    if (!translations[lang]) return;
+    currentLang = lang;
+    localStorage.setItem('textureConverterLang', lang);
+
+    document.querySelectorAll('[data-lang-key]').forEach(el => {
+        const key = el.dataset.langKey;
+        const translation = translations[lang][key];
+        if (translation) {
+            if (translation.includes('<') || translation.includes('(')) {
+                 el.innerHTML = translation;
+            } else {
+                 el.textContent = translation;
+            }
+        }
+    });
+
+    document.querySelectorAll('input[data-lang-key-placeholder]').forEach(input => {
+        const key = input.dataset.langKeyPlaceholder;
+        if(key && translations[lang][key]) {
+            input.placeholder = translations[lang][key];
+        }
+    });
+    
+    document.querySelector('title').textContent = translations[lang].pageTitle;
+    if (mapperView && !mapperView.classList.contains('hidden')) {
+        renderRuleSetContents(selectedRuleSetForEditing);
+    }
+    if (mappingModal && !mappingModal.classList.contains('hidden')) {
+        openMappingModal(currentMtPath); // Re-render modal to update labels
+    }
+
+
+    document.querySelectorAll('.lang-switcher button').forEach(btn => {
+        if(btn.dataset.lang === lang) {
+            btn.classList.add('bg-indigo-600', 'text-white');
+            btn.classList.remove('bg-slate-200', 'text-slate-700');
+        } else {
+            btn.classList.remove('bg-indigo-600', 'text-white');
+            btn.classList.add('bg-slate-200', 'text-slate-700');
+        }
+    });
+}
+
+// --- FILE HANDLING & INITIALIZATION ---
+const setupUploadListeners = (dropZone, fileInput, statusElement, callback) => {
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0], statusElement, callback));
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        handleFileSelect(e.dataTransfer.files[0], statusElement, callback);
+    });
+};
+const handleFileSelect = async (file, statusElement, callback) => {
+    if (!file || !file.name.endsWith('.zip')) { 
+        statusElement.textContent = translations[currentLang].statusPleaseZip; 
+        return; 
+    }
+    statusElement.innerHTML = `<div class="spinner w-5 h-5 border-2 rounded-full mx-auto"></div>`;
+    try {
+        await callback(file);
+        statusElement.innerHTML = `<i class="fas fa-check-circle text-green-500 mr-2"></i> ${translations[currentLang].statusLoaded.replace('{file}', file.name)}`;
+        checkIfReady();
+    } catch (e) {
+        statusElement.innerHTML = `<i class="fas fa-times-circle text-red-500 mr-2"></i> ${translations[currentLang].statusError.replace('{error}', e.message)}`;
+    }
+};
+const processZip = async (file, targetArray) => {
+    targetArray.length = 0;
+    const zip = await JSZip.loadAsync(file);
+    const promises = [];
+    zip.forEach((relativePath, zipEntry) => {
+        if (!zipEntry.dir && relativePath.toLowerCase().endsWith('.png')) {
+            const promise = new Promise(async (resolve) => {
+                try {
+                    const base64 = await zipEntry.async('base64');
+                    const url = `data:image/png;base64,${base64}`;
+                    const img = await loadImage(url);
+                    if (img.width > 0 && img.height > 0) {
+                        targetArray.push({ 
+                            path: relativePath, 
+                            filename: getFileName(relativePath), 
+                            url: url,
+                            thumbnailUrl: createThumbnail(img),
+                            width: img.width,
+                            height: img.height,
+                            img: img
+                        });
+                    }
+                } catch (e) {
+                    console.warn(`Skipping corrupted or invalid image: ${relativePath}`, e);
+                }
+                resolve();
+            });
+            promises.push(promise);
+        }
+    });
+    await Promise.all(promises);
+    targetArray.sort((a, b) => a.path.localeCompare(b.path));
+};
+
+const processGeneratedTextures = async () => {
+    mcTextures = mcTextures.filter(t => !t.path.startsWith('generated/'));
+    const promises = [];
+    for (const setName in ruleSets) {
+        const set = ruleSets[setName];
+        for (const [path, mapping] of Object.entries(set.generated || {})) {
+            const promise = (async () => {
+                try {
+                    const base64 = await processSingleMapping(mapping, path);
+                    if (base64) {
+                        const url = `data:image/png;base64,${base64}`;
+                        const img = await loadImage(url);
+                        mcTextures.push({
+                            path: path,
+                            filename: getFileName(path),
+                            url: url,
+                            thumbnailUrl: createThumbnail(img),
+                            width: img.width,
+                            height: img.height,
+                            img: img
+                        });
+                    }
+                } catch (e) { console.error(`Failed to generate texture ${path}`, e); }
+            })();
+            promises.push(promise);
+        }
+    }
+    await Promise.all(promises);
+    mcTextures.sort((a, b) => a.path.localeCompare(b.path));
+};
+
+const checkIfReady = async () => {
+    if (mcTextures.length > 0 && mtTextures.length > 0) {
+        await processGeneratedTextures();
+        uploadView.classList.add('hidden');
+        mapperView.classList.remove('hidden');
+        renderRuleSets();
+        renderLists();
+        startAnalysisAndScoring();
+    }
+};
+
+// --- CORE UI RENDERING ---
+const renderLists = () => {
+    const unmappedFilter = searchUnmapped.value.toLowerCase();
+    const mappedFilter = searchMapped.value.toLowerCase();
+    unmappedList.innerHTML = '';
+    mappedList.innerHTML = '';
+    let unmappedCounter = 0;
+    let mappedCounter = 0;
+
+    const allMappedItems = [];
+    
+    mtTextures.forEach(item => {
+        const mtFilename = getFileName(item.path);
+        const isSessionMapped = !!sessionMappings[mtFilename];
+        const savedMapping = getMappingFromActiveSets(mtFilename);
+        const isSavedMapped = !!savedMapping;
+
+        if(isSessionMapped || isSavedMapped) {
+            allMappedItems.push({
+                item,
+                type: isSessionMapped ? 'session' : 'saved',
+                mapping: isSessionMapped ? sessionMappings[mtFilename] : savedMapping
+            });
+        } else if (item.filename.toLowerCase().includes(unmappedFilter)) {
+            unmappedList.appendChild(createTextureListItem(item, 'unmapped'));
+            unmappedCounter++;
+        }
+    });
+
+    allMappedItems
+        .filter(data => {
+            const mappingText = data.mapping ? `${data.mapping.type} ${Object.values(data.mapping.sources || {}).join(' ')}` : '';
+            const searchText = `${data.item.filename} ${mappingText}`.toLowerCase();
+            return searchText.includes(mappedFilter);
+        })
+        .forEach(data => {
+            mappedList.appendChild(createTextureListItem(data.item, data.type, data.mapping));
+            mappedCounter++;
+        });
+
+    const unmappedCountEl = document.getElementById('unmappedCount');
+    if (unmappedCountEl) unmappedCountEl.textContent = unmappedCounter;
+
+    const mappedCountEl = document.getElementById('mappedCount');
+    if (mappedCountEl) mappedCountEl.textContent = mappedCounter;
+
+    saveAllSessionButton.classList.toggle('hidden', Object.keys(sessionMappings).length === 0);
+};
+
+const createTextureListItem = (item, type, mapping = null) => {
+    const li = document.createElement('li');
+    li.className = 'texture-list-item flex items-center gap-3 p-2 rounded-md cursor-pointer';
+    let iconHtml = '<i class="fas fa-link"></i>';
+    let colorClass = 'text-slate-800';
+    if (type === 'saved') {
+        iconHtml = '<i class="fas fa-check-circle text-green-500"></i>';
+        colorClass = 'text-green-600';
+    } else if (type === 'session') {
+        iconHtml = '<i class="fas fa-save text-orange-500"></i>';
+        colorClass = 'text-orange-600';
+    }
+
+    li.innerHTML = `
+        <img src="${item.thumbnailUrl}" class="w-10 h-10 object-contain bg-slate-200 rounded" style="image-rendering: pixelated;">
+        <div class="flex-grow overflow-hidden">
+            <span class="font-mono text-sm font-semibold block truncate ${colorClass}" title="${item.path}">${item.filename}</span>
+            <span class="mapped-indicator text-xs font-medium text-indigo-600 ${mapping ? '' : 'hidden'}"></span>
+        </div>
+        <div class="ml-auto text-slate-400 flex-shrink-0">${iconHtml}</div>
+    `;
+    if (mapping) {
+        let sourceText = '';
+        if (mapping.type === 'rename' && mapping.sources.source) { sourceText = getFileName(mapping.sources.source); }
+        else if (mapping.sources) { sourceText = Object.values(mapping.sources).filter(s => typeof s === 'string').map(getFileName).join(', '); }
+        li.querySelector('.mapped-indicator').textContent = `${mapping.type}: ${sourceText}`;
+    }
+    li.addEventListener('click', () => {
+        if (_clonedMapping && type === 'unmapped') {
+            sessionMappings[getFileName(item.path)] = JSON.parse(JSON.stringify(_clonedMapping));
+            _clonedMapping = null;
+            convertStatus.innerHTML = '';
+            renderLists();
+        } else {
+            openMappingModal(item.path);
+        }
+    });
+    return li;
+};
+
+// --- KURAL SETİ YÖNETİMİ ---
+const renderGeneratedTexturesForSet = (setName) => {
+    const listEl = document.getElementById('generatedTextureList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    const set = ruleSets[setName];
+    if (!set || !set.generated) return;
+
+    Object.keys(set.generated).forEach(path => {
+        const filename = getFileName(path);
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between p-2 rounded-md border bg-slate-50';
+        li.innerHTML = `
+            <span class="font-mono text-xs text-slate-700">${filename}</span>
+            <button title="Delete this generated texture" class="delete-generated-btn text-slate-500 hover:text-red-600 p-1 rounded hover:bg-slate-200"><i class="fas fa-trash"></i></button>
+        `;
+        li.querySelector('.delete-generated-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteGeneratedTexture(path, setName);
+        });
+        listEl.appendChild(li);
+    });
+};
+
+const deleteGeneratedTexture = (path, setName) => {
+    const filename = getFileName(path);
+    const message = translations[currentLang].confirmDeleteGenerated.replace('{fileName}', filename);
+    showConfirm(message, async () => {
+        if (ruleSets[setName] && ruleSets[setName].generated) {
+            delete ruleSets[setName].generated[path];
+        }
+        saveStateToLocal();
+        await processGeneratedTextures(); // Reprocess all to remove the deleted one
+        renderGeneratedTexturesForSet(setName);
+        renderLists();
+    });
+};
+
+const renderRuleSets = () => {
+    ruleSetList.innerHTML = '';
+    Object.keys(ruleSets).forEach(setName => {
+        const set = ruleSets[setName];
+        const li = document.createElement('li');
+        const classList = ['rule-set-item', 'flex', 'items-center', 'justify-between', 'p-2', 'rounded-md', 'border-2', 'cursor-pointer'];
+        if (selectedRuleSetForEditing === setName) classList.push('selected');
+        else classList.push('border-transparent');
+        if (set.active) classList.push('active-set');
+        li.className = classList.join(' ');
+        
+        li.innerHTML = `
+            <div class="flex items-center gap-3 flex-grow">
+                <input type="checkbox" class="toggle-active h-5 w-5 rounded text-indigo-600 focus:ring-indigo-500" ${set.active ? 'checked' : ''}>
+                <span class="font-semibold text-sm flex-grow">${setName}</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <button title="Export this rule set" class="export-set-btn text-slate-500 hover:text-indigo-600 p-2 rounded hover:bg-slate-100"><i class="fas fa-download"></i></button>
+                <button title="Delete this rule set" class="delete-set-btn text-slate-500 hover:text-red-600 p-2 rounded hover:bg-slate-100"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+        li.addEventListener('click', () => { 
+            selectedRuleSetForEditing = setName; 
+            renderRuleSets(); 
+            renderRuleSetContents(setName); 
+        });
+        
+        const checkbox = li.querySelector('.toggle-active');
+        checkbox.addEventListener('click', (e) => e.stopPropagation());
+        checkbox.addEventListener('change', (e) => toggleRuleSetActivation(setName, e.target.checked));
+
+        li.querySelector('.export-set-btn').addEventListener('click', (e) => { e.stopPropagation(); exportRuleSet(setName); });
+        li.querySelector('.delete-set-btn').addEventListener('click', (e) => { e.stopPropagation(); deleteRuleSet(setName); });
+        ruleSetList.appendChild(li);
+    });
+};
+
+const renderRuleSetContents = (setName) => {
+    const set = ruleSets[setName];
+    const filter = searchRuleSet.value.toLowerCase();
+    searchRuleSet.style.display = set ? 'block' : 'none';
+
+    if (!set) {
+        ruleSetContentHeader.textContent = translations[currentLang].selectSetPrompt;
+        ruleSetContent.innerHTML = `<p class="text-slate-500 text-sm">${translations[currentLang].selectSetPrompt}</p>`;
+        document.getElementById('generatedContent').style.display = 'none';
+        return;
+    };
+    
+    document.getElementById('generatedContent').style.display = 'block';
+    renderGeneratedTexturesForSet(setName);
+
+    const mappings = set.mappings;
+    const filteredMappings = Object.keys(mappings).filter(mtFilename => mtFilename.toLowerCase().includes(filter));
+
+    ruleSetContentHeader.innerHTML = `<span class="font-bold text-indigo-700">${setName}</span> (${filteredMappings.length} / ${Object.keys(mappings).length} rules)`;
+    ruleSetContent.innerHTML = '';
+    if (Object.keys(mappings).length === 0) {
+        ruleSetContent.innerHTML = `<p class="text-slate-500 text-sm p-4">No rules saved in this set yet.</p>`;
+    } else {
+        const ul = document.createElement('ul');
+        ul.className = 'space-y-2';
+        filteredMappings.forEach(mtFilename => {
+            const mapping = mappings[mtFilename];
+            const mtTexture = mtTextures.find(t => getFileName(t.path) === mtFilename);
+            const li = document.createElement('li');
+            li.className = 'p-2 border rounded-md flex items-center gap-3';
+            
+            let sourceImagesHtml = Object.entries(mapping.sources || {}).map(([key, sourcePath]) => {
+                 if (!sourcePath || typeof sourcePath !== 'string') return '';
+                 const allSourceTextures = [...mcTextures, ...mtTextures];
+                const sourceTexture = findTextureByPath(sourcePath, allSourceTextures);
+                return `<img src="${sourceTexture?.thumbnailUrl || 'https://placehold.co/24x24/e2e8f0/64748b?text=?'}" class="w-6 h-6 object-contain rounded bg-slate-200" style="image-rendering: pixelated;" title="${key}: ${getFileName(sourcePath)}">`;
+            }).join('');
+
+            li.innerHTML = `
+                <img src="${mtTexture?.thumbnailUrl || 'https://placehold.co/24x24/e2e8f0/64748b?text=?'}" class="w-6 h-6 object-contain rounded bg-slate-200" style="image-rendering: pixelated;" title="${mtTexture?.path}">
+                <span class="font-mono text-xs flex-shrink-0">${mtFilename}</span>
+                <i class="fas fa-long-arrow-alt-right text-slate-400"></i>
+                <div class="flex gap-1 flex-wrap">${sourceImagesHtml}</div>
+                <div class="ml-auto flex-shrink-0">
+                    <button class="edit-mapping-btn text-slate-500 hover:text-indigo-600 p-2 rounded hover:bg-slate-100" data-mtpath="${mtTexture?.path}"><i class="fas fa-edit"></i></button>
+                    <button class="delete-mapping-btn text-slate-500 hover:text-red-600 p-2 rounded hover:bg-slate-100" data-mtfilename="${mtFilename}"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            ul.appendChild(li);
+        });
+        ruleSetContent.appendChild(ul);
+    }
+
+    ruleSetContent.querySelectorAll('.edit-mapping-btn').forEach(btn => btn.addEventListener('click', (e) => {
+        if(e.currentTarget.dataset.mtpath !== 'undefined') openMappingModal(e.currentTarget.dataset.mtpath)
+    }));
+    ruleSetContent.querySelectorAll('.delete-mapping-btn').forEach(btn => btn.addEventListener('click', (e) => {
+        const filenameToDelete = e.currentTarget.dataset.mtfilename;
+        const message = translations[currentLang].confirmDeleteMapping.replace('{fileName}', filenameToDelete);
+        showConfirm(message, () => {
+            delete ruleSets[setName].mappings[filenameToDelete];
+            saveStateToLocal();
+            renderRuleSetContents(setName);
+            renderLists();
+        });
+    }));
+};
+const createNewRuleSet = (name, doSave = true) => { const setName = name.trim(); if (!setName) return; if (ruleSets[setName]) { alert(translations[currentLang].ruleSetExistsAlert); return; } ruleSets[setName] = { mappings: {}, generated: {}, active: true }; if(doSave) saveStateToLocal(); renderRuleSets(); newRuleSetName.value = ''; };
+const toggleRuleSetActivation = (setName, isActive) => { if (ruleSets[setName]) { ruleSets[setName].active = isActive; saveStateToLocal(); renderLists(); renderRuleSets(); } };
+const deleteRuleSet = (setName) => {
+    if (Object.keys(ruleSets).length <= 1) { alert(translations[currentLang].atLeastOneSetAlert); return; }
+    const message = translations[currentLang].confirmDeleteSet.replace('{setName}', setName);
+    showConfirm(message, () => {
+        delete ruleSets[setName];
+        if(selectedRuleSetForEditing === setName) {
+            selectedRuleSetForEditing = null;
+            renderRuleSetContents(null);
+        }
+        saveStateToLocal();
+        renderRuleSets();
+        renderLists();
+    });
+};
+const exportRuleSet = (setName) => { const set = ruleSets[setName]; if (!set) return; const json = JSON.stringify({ mappings: set.mappings || {}, generated: set.generated || {} }, null, 2); const blob = new Blob([json], { type: 'application/json' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `${setName}_rules.json`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); };
+const importRuleSet = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            let newSetName = file.name.replace('_rules.json', '').replace('.json', '');
+            let counter = 1;
+            while (ruleSets[newSetName]) {
+                newSetName = `${file.name.replace('.json', '')}_${counter}`;
+                counter++;
+            }
+            // Check for new vs old format
+            if (importedData.mappings || importedData.generated) {
+                 ruleSets[newSetName] = { mappings: importedData.mappings || {}, generated: importedData.generated || {}, active: true };
+            } else {
+                 ruleSets[newSetName] = { mappings: importedData, generated: {}, active: true }; // Old format
+            }
+           
+            saveStateToLocal();
+            await processGeneratedTextures();
+            renderRuleSets();
+            renderLists();
+            alert(translations[currentLang].importSuccess.replace('{setName}', newSetName));
+        } catch (err) {
+            alert(translations[currentLang].importError.replace('{error}', err.message));
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+};
+
+
+// --- MAPPING MODAL & LOGIC ---
+const openMappingModal = async (mtPath, mcPath = null) => {
+    isFirstPreviewLoad = true;
+    currentMtPath = mtPath;
+    const mtTexture = findTextureByPath(mtPath, mtTextures);
+    if (!mtTexture) return;
+
+    modalMtImage.src = mtTexture.thumbnailUrl;
+    modalMtImage.style.imageRendering = 'pixelated';
+    modalMtName.textContent = mtTexture.filename;
+    modalMtResolution.textContent = `${mtTexture.width}x${mtTexture.height}`;
+
+    let currentMapping;
+    const mtFilename = getFileName(mtPath);
+    const hasSessionMapping = !!sessionMappings[mtFilename];
+    const hasSavedMapping = !!getMappingFromActiveSets(mtFilename);
+
+    if (hasSessionMapping) {
+        currentMapping = JSON.parse(JSON.stringify(sessionMappings[mtFilename]));
+    } else if (hasSavedMapping) {
+        currentMapping = JSON.parse(JSON.stringify(getMappingFromActiveSets(mtFilename)));
+    } else if (mcPath) {
+        currentMapping = { type: 'rename', sources: { source: mcPath } };
+        sessionMappings[mtFilename] = currentMapping;
+    } else if (defaultChestMappings[mtFilename]) {
+        currentMapping = JSON.parse(JSON.stringify(defaultChestMappings[mtFilename]));
+        sessionMappings[mtFilename] = currentMapping; 
+    } else {
+        currentMapping = {};
+    }
+    
+    const methods = [
+        { key: 'rename', langKey: 'methodRename' },
+        { key: 'colorize', langKey: 'methodColorize' },
+        { key: 'saydamlastir', langKey: 'methodSaydamlastir'},
+        { key: 'compose_door', langKey: 'methodDoor' },
+        { key: 'create_chest', langKey: 'methodChest'},
+        { key: 'compose', langKey: 'methodCompose' },
+        { key: 'transform', langKey: 'methodTransform' },
+        { key: 'montage', langKey: 'methodMontage' }
+    ];
+
+    methodSelector.innerHTML = methods.map(m => `<option value="${m.key}">${translations[currentLang][m.langKey]}</option>`).join('');
+
+    if (currentMapping.type) {
+        methodSelector.value = currentMapping.type;
+    } else {
+        methodSelector.value = 'rename';
+    }
+    await updateMethodInputs(currentMapping);
+    mappingModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    // Auto-focus first source input
+    setTimeout(() => {
+        const firstSourceInput = methodInputs.querySelector('.source-input');
+        if (firstSourceInput && !mcPath) {
+             firstSourceInput.click();
+        } else if (firstSourceInput) {
+             // If a path is provided, we still need to trigger the suggestion engine
+             firstSourceInput.click();
+             setTimeout(() => firstSourceInput.classList.remove('border-indigo-500'), 200);
+        }
+    }, 100);
+};
+
+const drawCropBox = (canvas, sources) => {
+    const container = canvas.parentElement;
+    if (!container) return;
+    container.querySelectorAll('.crop-box').forEach(box => box.remove());
+
+    const s = sources || {};
+    const scaleX = canvas.clientWidth / canvas.width;
+    const scaleY = canvas.clientHeight / canvas.height;
+    
+    const box = document.createElement('div');
+    box.className = 'crop-box';
+    box.style.left = `${(s.cropX || 0) * canvas.width * scaleX}px`;
+    box.style.top = `${(s.cropY || 0) * canvas.height * scaleY}px`;
+    box.style.width = `${(s.cropW || 1) * canvas.width * scaleX}px`;
+    box.style.height = `${(s.cropH || 1) * canvas.height * scaleY}px`;
+    container.appendChild(box);
+};
+
+const drawMontageBoxes = (canvas, parts, activeIndex = -1) => {
+    const container = canvas.parentElement;
+    if (!container) return;
+    container.querySelectorAll('.crop-box').forEach(box => box.remove());
+    if (!parts) return;
+
+    const scaleX = canvas.clientWidth / canvas.width;
+    const scaleY = canvas.clientHeight / canvas.height;
+
+    parts.forEach((p, index) => {
+        const box = document.createElement('div');
+        box.className = 'crop-box';
+        if (index === activeIndex) {
+            box.style.borderColor = 'rgba(0, 255, 0, 0.9)'; // Active part is green
+            box.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+        }
+        box.style.left = `${(p.sx || 0) * canvas.width * scaleX}px`;
+        box.style.top = `${(p.sy || 0) * canvas.height * scaleY}px`;
+        box.style.width = `${(p.sw || 1) * canvas.width * scaleX}px`;
+        box.style.height = `${(p.sh || 1) * canvas.height * scaleY}px`;
+        container.appendChild(box);
+    });
+}
+
+
+// --- DYNAMIC INPUT GENERATION ---
+const createInput = (type, key, labelKey, value, options) => {
+    const opts = options || {};
+    const div = document.createElement('div');
+    const label = translations[currentLang][labelKey] || labelKey;
+
+    switch(type) {
+        case 'source':
+            const { path, sourceArray } = opts;
+            const texture = path ? findTextureByPath(path, sourceArray) : null;
+            div.innerHTML = `
+                <label class="font-semibold text-xs">${label}:</label>
+                <div data-source-key="${key}" class="source-input mt-1 flex items-center gap-2 p-2 bg-slate-100 rounded-md border-2 border-transparent cursor-pointer hover:border-indigo-400">
+                    <img src="${texture?.thumbnailUrl || 'https://placehold.co/32x32/e2e8f0/64748b?text=?'}" class="w-8 h-8 object-contain rounded" style="image-rendering: pixelated;">
+                    <span class="font-mono text-xs break-all" title="${texture?.path || 'Not Selected'}">${texture?.filename || 'Not Selected'}</span>
+                </div>
+            `;
+            div.querySelector('.source-input').addEventListener('click', (e) => {
+                document.querySelectorAll('.source-input').forEach(el => el.classList.remove('border-indigo-500'));
+                e.currentTarget.classList.add('border-indigo-500');
+                currentSourceInput = e.currentTarget.dataset.sourceKey;
+                triggerSuggestions();
+            });
+            break;
+        case 'number':
+            const { placeholder } = opts;
+            div.innerHTML = `
+                <label class="font-semibold text-xs">${label}</label>
+                <input type="number" data-source-key="${key}" value="${value || 0}" placeholder="${placeholder || ''}" class="w-full p-2 mt-1 border rounded-lg text-sm">
+            `;
+            break;
+        case 'select':
+            const optionsHtml = opts.map(opt => `<option value="${opt.value}" ${opt.value === value ? 'selected' : ''}>${opt.text}</option>`).join('');
+            div.innerHTML = `
+                <label class="font-semibold text-xs">${label}</label>
+                <select data-source-key="${key}" class="w-full p-2 mt-1 border rounded-md bg-white text-sm">${optionsHtml}</select>
+            `;
+            break;
+        case 'color':
+            div.innerHTML = `
+                <label class="font-semibold text-xs">${label}</label>
+                <input type="color" data-source-key="${key}" value="${value || '#ffffff'}" class="w-full h-8 p-1 border rounded-md mt-1">
+            `;
+            break;
+        case 'checkbox':
+             div.innerHTML = `
+                <label class="flex items-center text-sm font-semibold">
+                    <input type="checkbox" data-source-key="${key}" ${value ? 'checked' : ''} class="mr-2 h-4 w-4 rounded text-indigo-600 focus:ring-indigo-500">
+                    <span>${label}</span>
+                </label>
+            `;
+            break;
+        case 'proportional': { // use block scope
+            const { min = 0, max = 1, step = 0.01, sourcePath, dim, isDimension } = opts;
+            div.className = 'flex flex-col text-xs py-1';
+            
+            div.innerHTML = `
+                <label class="font-semibold mb-1">${label}</label>
+                <div class="flex items-center gap-2">
+                    <input type="range" data-source-key="${key}" value="${value || 0}" min="${min}" max="${max}" step="${step}" class="proportional-range w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <input type="number" class="proportional-number font-mono w-20 text-center text-slate-600 text-xs p-1 border rounded-md">
+                </div>
+            `;
+            
+            const rangeInput = div.querySelector('.proportional-range');
+            const numberInput = div.querySelector('.proportional-number');
+
+            const getValueDimension = () => {
+                let dimension = 0;
+                if(sourcePath) {
+                    if (sourcePath === 'CANVAS') {
+                        const s = sessionMappings[getFileName(currentMtPath)]?.sources || {};
+                        const baseTexture = mtTextures.find(t => t.path === currentMtPath);
+                        if(baseTexture) {
+                           const w = (s.canvasW || 1) * baseTexture.width;
+                           const h = (s.canvasH || 1) * baseTexture.height;
+                           dimension = dim === 'width' ? w : h;
+                        }
+                    } else {
+                        const allTextures = [...mcTextures, ...mtTextures];
+                        const sourceTexture = findTextureByPath(sourcePath, allTextures);
+                        if(sourceTexture) dimension = sourceTexture[dim];
+                    }
+                }
+                return dimension;
+            };
+
+            const updateNumberFromRange = () => {
+                const proportionalValue = parseFloat(rangeInput.value);
+                const dimension = getValueDimension();
+                if (isDimension) {
+                    numberInput.value = (proportionalValue * 100).toFixed(1);
+                } else if (dimension > 0) {
+                    numberInput.value = Math.round(proportionalValue * dimension);
+                } else {
+                    numberInput.value = proportionalValue.toFixed(3);
+                }
+                numberInput.step = isDimension ? '0.1' : (dimension > 0 ? '1' : '0.001');
+            };
+
+            const updateRangeFromNumber = () => {
+                const numericValue = parseFloat(numberInput.value);
+                if (isNaN(numericValue)) return;
+                
+                const dimension = getValueDimension();
+                let newPropValue;
+                
+                if (isDimension) {
+                    newPropValue = numericValue / 100;
+                } else if (dimension > 0) {
+                    newPropValue = numericValue / dimension;
+                } else {
+                    newPropValue = numericValue;
+                }
+                
+                const clampedValue = Math.max(min, Math.min(max, newPropValue));
+                if (parseFloat(rangeInput.value) !== clampedValue) {
+                     rangeInput.value = clampedValue;
+                }
+            };
+
+            rangeInput.addEventListener('input', () => {
+                updateNumberFromRange();
+                handleMethodInputChange({ target: rangeInput }); // Manually call handler
+            });
+            
+            numberInput.addEventListener('change', () => { // Use change to avoid firing on every keystroke
+                updateRangeFromNumber();
+                handleMethodInputChange({ target: rangeInput }); // Manually call handler
+            });
+
+            updateNumberFromRange(); // Set initial value
+            break;
+        }
+    }
+    return div;
+};
+
+const createInteractivePreview = (key, sourcePath, sourceArray) => {
+    const texture = sourcePath ? findTextureByPath(sourcePath, sourceArray) : null;
+    if (!texture) return document.createElement('div');
+
+    const container = document.createElement('div');
+    container.className = 'interactive-preview-container mt-2';
+    const canvas = document.createElement('canvas');
+    canvas.className = 'w-full h-auto border rounded-md';
+    container.appendChild(canvas);
+
+    const img = new Image();
+    img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, 0, 0);
+
+        const currentMapping = sessionMappings[getFileName(currentMtPath)] || {};
+        if(methodSelector.value === 'transform') {
+            drawCropBox(canvas, currentMapping.sources);
+        } else if (methodSelector.value === 'montage') {
+            const activeIndex = key.startsWith('parts.') ? parseInt(key.split('.')[1], 10) : -1;
+            if (activeIndex > -1 && currentMapping.sources?.parts?.[activeIndex]) {
+                drawMontageBoxes(canvas, [currentMapping.sources.parts[activeIndex]], 0);
+            }
+        }
+    };
+    img.src = texture.url;
+
+    canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const pixelX = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
+        const pixelY = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
+        const ctx = canvas.getContext('2d');
+        const pixelData = ctx.getImageData(pixelX, pixelY, 1, 1).data;
+        const hexColor = `#${pixelData[0].toString(16).padStart(2, '0')}${pixelData[1].toString(16).padStart(2, '0')}${pixelData[2].toString(16).padStart(2, '0')}`;
+        const [hue, sat, light] = rgbToHsl(pixelData[0], pixelData[1], pixelData[2]);
+
+
+        if (methodSelector.value === 'colorize') {
+             const isReplaceEnabled = methodInputs.querySelector('[data-source-key="enableColorReplace"]')?.checked;
+             if(isReplaceEnabled) {
+                 let mapping = sessionMappings[getFileName(currentMtPath)];
+                 if (!mapping.sources.replaceColors) mapping.sources.replaceColors = [];
+                 mapping.sources.replaceColors.push({ color: hexColor });
+                 sessionMappings[getFileName(currentMtPath)] = mapping;
+                 updateMethodInputs(mapping);
+             } else {
+                const xRatio = pixelX / canvas.width;
+                const yRatio = pixelY / canvas.height;
+
+                let mapping = sessionMappings[getFileName(currentMtPath)];
+                if (!mapping.sources) mapping.sources = {};
+                mapping.sources.colorX = xRatio;
+                mapping.sources.colorY = yRatio;
+                sessionMappings[getFileName(currentMtPath)] = mapping;
+
+                updateColorSwatchUI(mapping);
+                updateMappingPreview();
+             }
+        } else if (methodSelector.value === 'saydamlastir') {
+            let mapping = sessionMappings[getFileName(currentMtPath)];
+            if (!mapping.sources) mapping.sources = {};
+            mapping.sources.targetHue = hue;
+            sessionMappings[getFileName(currentMtPath)] = mapping;
+            updateMethodInputs(mapping);
+        }
+    });
+    return container;
+};
+
+const createCanvasSizeInputs = (s) => {
+    const container = document.createElement('div');
+    container.className = 'method-input-grid border-t pt-2 mt-2';
+    container.appendChild(createInput('proportional', 'canvasW', 'methodLabelOutputCanvasW', s.canvasW || 1, {min: 0, max: 5, step: 0.05, isDimension: true}));
+    container.appendChild(createInput('proportional', 'canvasH', 'methodLabelOutputCanvasH', s.canvasH || 1, {min: 0, max: 5, step: 0.05, isDimension: true}));
+    container.appendChild(createInput('number', 'canvasOffsetX', 'methodLabelCanvasOffsetX', s.canvasOffsetX || 0, {placeholder: '0'}));
+    container.appendChild(createInput('number', 'canvasOffsetY', 'methodLabelCanvasOffsetY', s.canvasOffsetY || 0, {placeholder: '0'}));
+    return container;
+}
+
+const updateColorSwatchUI = async (mapping) => {
+    const swatch = document.getElementById('pickedColorSwatch');
+    if (!swatch) return;
+
+    const s = mapping.sources || {};
+    const colorSourceType = s.colorSourceType || 'minecraft';
+
+    if (colorSourceType === 'specific_color') {
+        swatch.style.backgroundColor = s.colorValue || '#FFFFFF';
+        return;
+    }
+
+    const sourceArray = colorSourceType === 'minetest' ? mtTextures : (colorSourceType === 'self' ? mtTextures : mcTextures);
+    const colorSourcePath = colorSourceType === 'self' ? currentMtPath : s.colorSource;
+    const colorImg = await getImage(colorSourcePath, sourceArray);
+
+    if (!colorImg) {
+        swatch.style.backgroundColor = '#e2e8f0'; // placeholder color
+        return;
+    }
+
+    const colorCanvas = document.createElement('canvas');
+    const colorCtx = colorCanvas.getContext('2d', { willReadFrequently: true });
+    colorCanvas.width = colorImg.width;
+    colorCanvas.height = colorImg.height;
+    colorCtx.drawImage(colorImg, 0, 0);
+
+    const pixelX = Math.floor((s.colorX || 0) * colorImg.width);
+    const pixelY = Math.floor((s.colorY || 0) * colorImg.height);
+    const colorData = colorCtx.getImageData(pixelX, pixelY, 1, 1).data;
+    swatch.style.backgroundColor = `rgb(${colorData[0]}, ${colorData[1]}, ${colorData[2]})`;
+};
+
+
+const updateMethodInputs = async (currentMapping) => {
+    const type = methodSelector.value;
+    methodInputs.innerHTML = '';
+    
+    const s = currentMapping?.sources || {};
+
+    const renderMontageParts = (parts = []) => {
+        const container = document.getElementById('montagePartsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        parts.forEach((part, index) => {
+            const details = document.createElement('details');
+            details.className = "border rounded-md";
+            details.open = true;
+
+            const summary = document.createElement('summary');
+            summary.className = "p-2 font-bold text-sm cursor-pointer flex justify-between items-center";
+            const title = document.createElement('span');
+            title.dataset.langKey = "partTitle";
+            title.textContent = translations[currentLang].partTitle.replace('{n}', index + 1);
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = "delete-part-btn text-red-500 hover:text-red-700 text-xs";
+            deleteBtn.dataset.index = index;
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                let mapping = sessionMappings[getFileName(currentMtPath)];
+                if (mapping?.sources?.parts) {
+                    mapping.sources.parts.splice(index, 1);
+                    sessionMappings[getFileName(currentMtPath)] = mapping;
+                    updateMethodInputs(mapping);
+                }
+            });
+
+            summary.appendChild(title);
+            summary.appendChild(deleteBtn);
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'p-2 border-t space-y-2';
+            
+            contentDiv.appendChild(createInput('source', `parts.${index}.source`, 'methodLabelSource', part.source, {sourceArray: [...mcTextures, ...mtTextures], path: part.source}));
+            
+            if (part.source) {
+                 contentDiv.appendChild(createInteractivePreview(`parts.${index}.source`, part.source, [...mcTextures, ...mtTextures]));
+            }
+
+            contentDiv.appendChild(createInput('proportional', `parts.${index}.sx`, 'partSourceX', part.sx || 0, { sourcePath: part.source, dim: 'width' }));
+            contentDiv.appendChild(createInput('proportional', `parts.${index}.sy`, 'partSourceY', part.sy || 0, { sourcePath: part.source, dim: 'height' }));
+            contentDiv.appendChild(createInput('proportional', `parts.${index}.sw`, 'partSourceW', part.sw || 1, { sourcePath: part.source, dim: 'width', isDimension: true }));
+            contentDiv.appendChild(createInput('proportional', `parts.${index}.sh`, 'partSourceH', part.sh || 1, { sourcePath: part.source, dim: 'height', isDimension: true }));
+            contentDiv.appendChild(createInput('proportional', `parts.${index}.dx`, 'partDestX', part.dx || 0, { sourcePath: 'CANVAS', dim: 'width' }));
+            contentDiv.appendChild(createInput('proportional', `parts.${index}.dy`, 'partDestY', part.dy || 0, { sourcePath: 'CANVAS', dim: 'height' }));
+            
+            const rotateDiv = document.createElement('div');
+            rotateDiv.className = 'mt-2';
+            rotateDiv.appendChild(createInput('number', `parts.${index}.rotate`, 'partRotate', part.rotate || 0));
+            contentDiv.appendChild(rotateDiv);
+
+            details.appendChild(summary);
+            details.appendChild(contentDiv);
+            container.appendChild(details);
+        });
+    };
+
+    switch (type) {
+        case 'rename':
+            methodInputs.appendChild(createInput('source', 'source', 'methodLabelSource', s.source, { sourceArray: mcTextures, path: s.source}));
+            break;
+        case 'create_chest':
+            methodInputs.appendChild(createInput('source', 'source', 'methodLabelChestSource', s.source, { sourceArray: mcTextures, path: s.source}));
+            const chestParts = [ { value: 'top', text: 'Top' }, { value: 'front', text: 'Front' }, { value: 'side', text: 'Side' }, { value: 'inside', text: 'Inside' } ];
+            methodInputs.appendChild(createInput('select', 'chestPart', 'methodLabelChestPart', s.chestPart, chestParts));
+            break;
+        case 'compose_door':
+            methodInputs.appendChild(createInput('source', 'lower', 'methodLabelDoorLower', s.lower, { sourceArray: mcTextures, path: s.lower}));
+            methodInputs.appendChild(createInput('source', 'upper', 'methodLabelDoorUpper', s.upper, { sourceArray: mcTextures, path: s.upper}));
+            break;
+        case 'colorize': {
+             methodInputs.appendChild(createInput('source', 'base', 'methodLabelColorizeBase', s.base, { sourceArray: mcTextures, path: s.base}));
+             
+             const colorSourceType = s.colorSourceType || 'minecraft';
+             
+             let previewSourcePath;
+             let previewSourceArray;
+             if (colorSourceType === 'self') {
+                 previewSourcePath = currentMtPath;
+                 previewSourceArray = mtTextures;
+             } else if (colorSourceType !== 'specific_color') {
+                 previewSourcePath = s.colorSource;
+                 previewSourceArray = colorSourceType === 'minetest' ? mtTextures : mcTextures;
+             }
+
+             if (previewSourcePath) {
+                 methodInputs.appendChild(createInteractivePreview('colorSource', previewSourcePath, previewSourceArray));
+             }
+
+             const colorSourceOptions = document.createElement('div');
+             colorSourceOptions.className = 'mt-2';
+             colorSourceOptions.innerHTML = `
+                 <label class="font-semibold text-xs" data-lang-key="methodLabelColorizeSourceType">${translations[currentLang].methodLabelColorizeSourceType}</label>
+                 <div class="mt-1 text-sm space-y-1">
+                     <div><label class="flex items-center"><input type="radio" name="colorSourceType" value="minecraft" ${colorSourceType === 'minecraft' ? 'checked' : ''} class="mr-2"> Minecraft Texture</label></div>
+                     <div><label class="flex items-center"><input type="radio" name="colorSourceType" value="minetest" ${colorSourceType === 'minetest' ? 'checked' : ''} class="mr-2"> Minetest Texture</label></div>
+                     <div><label class="flex items-center"><input type="radio" name="colorSourceType" value="self" ${colorSourceType === 'self' ? 'checked' : ''} class="mr-2"> Target Texture Itself</label></div>
+                     <div><label class="flex items-center"><input type="radio" name="colorSourceType" value="specific_color" ${colorSourceType === 'specific_color' ? 'checked' : ''} class="mr-2"> Specific Color</label></div>
+                 </div>
+             `;
+             methodInputs.appendChild(colorSourceOptions);
+             if (colorSourceType === 'specific_color') {
+                 methodInputs.appendChild(createInput('color', 'colorValue', 'methodLabelColorizeColorValue', s.colorValue));
+             } else {
+                 const sourceArrayForInput = colorSourceType === 'minetest' ? mtTextures : mcTextures;
+                 
+                 if(colorSourceType !== 'self') {
+                    methodInputs.appendChild(createInput('source', 'colorSource', 'methodLabelColorizeSource', s.colorSource, {sourceArray: sourceArrayForInput, path: s.colorSource}));
+                 }
+                 
+                const colorDisplayDiv = document.createElement('div');
+                colorDisplayDiv.className = 'mt-2';
+                colorDisplayDiv.innerHTML = `
+                    <label class="font-semibold text-xs">${translations[currentLang].methodLabelColorizeColorValue}</label>
+                    <div id="pickedColorSwatch" class="w-full h-8 p-1 border rounded-md mt-1 bg-slate-200"></div>
+                `;
+                methodInputs.appendChild(colorDisplayDiv);
+                await updateColorSwatchUI(currentMapping);
+             }
+
+            const blendModes = ['source-over', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'].map(m => ({value: m, text: m}));
+            methodInputs.appendChild(createInput('select', 'colorizeBlendMode', 'colorizeBlendMode', s.colorizeBlendMode, blendModes));
+             methodInputs.appendChild(createInput('proportional', 'colorizeAlpha', 'colorAlpha', s.colorizeAlpha ?? 1.0, {}));
+             methodInputs.appendChild(createInput('proportional', 'colorizeBrightness', 'colorBrightness', s.colorizeBrightness ?? 1.0, {min:0, max: 3, step: 0.05}));
+             
+             const replaceContainer = document.createElement('div');
+             replaceContainer.className = 'border-t pt-3 mt-3 space-y-2';
+             const replaceCheckbox = createInput('checkbox', 'enableColorReplace', 'enableColorReplace', s.enableColorReplace);
+             const replaceOptions = document.createElement('div');
+             replaceOptions.id = 'replaceOptionsContainer';
+             replaceOptions.className = `space-y-2 pl-6 ${s.enableColorReplace ? '' : 'hidden'}`;
+             
+            if(s.base) {
+                replaceOptions.appendChild(createInteractivePreview('base_replace', s.base, [...mcTextures, ...mtTextures]));
+            }
+
+             const replaceColorsList = document.createElement('div');
+             replaceColorsList.id = 'replaceColorsList';
+             replaceColorsList.className = 'space-y-2';
+             (s.replaceColors || []).forEach((item, index) => {
+                const colorItemDiv = document.createElement('div');
+                colorItemDiv.className = 'p-2 border rounded-md flex items-center justify-between';
+                const colorInputDiv = createInput('color', `replaceColors.${index}.color`, 'colorToReplace', item.color);
+                
+                const deleteColorBtn = document.createElement('button');
+                deleteColorBtn.className = 'text-red-500 hover:text-red-700 text-sm ml-2';
+                deleteColorBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                deleteColorBtn.onclick = () => {
+                    s.replaceColors.splice(index, 1);
+                    updateMethodInputs(currentMapping);
+                };
+                colorItemDiv.appendChild(colorInputDiv);
+                colorItemDiv.appendChild(deleteColorBtn);
+                replaceColorsList.appendChild(colorItemDiv);
+             });
+             replaceOptions.appendChild(replaceColorsList);
+
+             const hslOptionsDiv = document.createElement('div');
+             hslOptionsDiv.className = 'p-2 border rounded-md mt-2 bg-slate-50 space-y-2';
+             hslOptionsDiv.appendChild(createInput('proportional', 'hueTolerance', 'hueTolerance', s.hueTolerance ?? 30, {min:0, max:180, step:1}));
+             hslOptionsDiv.appendChild(createInput('proportional', 'minSaturation', 'minSaturation', s.minSaturation ?? 0.15, {}));
+             replaceOptions.appendChild(hslOptionsDiv);
+             
+             const addColorButton = document.createElement('button');
+             addColorButton.className = 'w-full mt-2 bg-slate-200 text-slate-700 font-bold py-1 px-2 text-xs rounded-lg hover:bg-slate-300';
+             addColorButton.dataset.langKey = 'addColorButton';
+             addColorButton.innerHTML = translations[currentLang].addColorButton;
+             addColorButton.onclick = () => {
+                if (!s.replaceColors) s.replaceColors = [];
+                s.replaceColors.push({ color: '#ff00ff' });
+                updateMethodInputs(currentMapping);
+             };
+             replaceOptions.appendChild(addColorButton);
+
+
+             replaceContainer.appendChild(replaceCheckbox);
+             replaceContainer.appendChild(replaceOptions);
+             methodInputs.appendChild(replaceContainer);
+             
+             replaceCheckbox.querySelector('input').addEventListener('change', (e) => {
+                replaceOptions.classList.toggle('hidden', !e.target.checked);
+             });
+
+             break;
+            }
+        case 'saydamlastir': {
+            methodInputs.appendChild(createInput('source', 'source', 'methodLabelSource', s.source, {sourceArray: mcTextures, path: s.source}));
+            if (s.source) {
+                methodInputs.appendChild(createInteractivePreview('source', s.source, mcTextures));
+            }
+            const controls = document.createElement('div');
+            controls.className = 'mt-2 space-y-2 border-t pt-2';
+            controls.appendChild(createInput('proportional', 'targetHue', 'methodLabelTargetHue', s.targetHue ?? 0, {min: 0, max: 360, step: 1}));
+            controls.appendChild(createInput('proportional', 'hueTolerance', 'hueTolerance', s.hueTolerance ?? 30, {min:0, max:180, step:1}));
+            controls.appendChild(createInput('proportional', 'minSaturation', 'minSaturation', s.minSaturation ?? 0.0, {}));
+            controls.appendChild(createInput('proportional', 'maxSaturation', 'maxSaturation', s.maxSaturation ?? 1.0, {}));
+            controls.appendChild(createInput('proportional', 'minLightness', 'minLightness', s.minLightness ?? 0.0, {}));
+            controls.appendChild(createInput('proportional', 'maxLightness', 'maxLightness', s.maxLightness ?? 1.0, {}));
+            methodInputs.appendChild(controls);
+            break;
+        }
+        case 'compose':
+            const baseSourceType = s.baseSourceType || 'minecraft';
+            const topSourceType = s.topSourceType || 'minecraft';
+
+            const createComposeLayerUI = (layerPrefix, labelKey, sourceType, sourcePath) => {
+                const container = document.createElement('div');
+                container.className = 'space-y-2';
+                const sourceTypeOptions = document.createElement('div');
+                sourceTypeOptions.innerHTML = `
+                    <label class="font-semibold text-xs">${translations[currentLang][`${labelKey}SourceType`]}</label>
+                    <div class="mt-1 text-sm flex gap-4">
+                        <label class="flex items-center"><input type="radio" name="${layerPrefix}SourceType" value="minecraft" ${sourceType === 'minecraft' ? 'checked' : ''} class="mr-2"> MC</label>
+                        <label class="flex items-center"><input type="radio" name="${layerPrefix}SourceType" value="minetest" ${sourceType === 'minetest' ? 'checked' : ''} class="mr-2"> MT</label>
+                    </div>`;
+                container.appendChild(sourceTypeOptions);
+                const sourceArray = sourceType === 'minetest' ? mtTextures : mcTextures;
+                container.appendChild(createInput('source', `${layerPrefix}Image`, labelKey, sourcePath, {sourceArray: sourceArray, path: sourcePath}));
+                container.appendChild(createInput('proportional', `${layerPrefix}Opacity`, layerPrefix === 'base' ? 'baseLayerOpacity' : 'topLayerOpacity', s[`${layerPrefix}Opacity`] ?? 1.0, {}));
+                
+                sourceTypeOptions.querySelectorAll('input').forEach(radio => radio.addEventListener('change', handleComposeSourceTypeChange));
+                return container;
+            }
+
+            methodInputs.appendChild(createComposeLayerUI('base', 'methodLabelComposeBase', baseSourceType, s.baseImage));
+            methodInputs.appendChild(createComposeLayerUI('top', 'methodLabelComposeTop', topSourceType, s.topImage));
+
+            const composeModes = ['source-over', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'].map(m => ({value: m, text: m}));
+            methodInputs.appendChild(createInput('select', 'composeMode', 'methodLabelComposeMode', s.composeMode, composeModes));
+            break;
+        case 'transform':
+             const sourceImage = await getImage(s.source);
+             if(!sourceImage) break;
+             methodInputs.appendChild(createInput('source', 'source', 'methodLabelSource', s.source, {sourceArray: mcTextures, path: s.source}));
+             if (s.source) {
+                methodInputs.appendChild(createInteractivePreview('source', s.source, mcTextures));
+             }
+            methodInputs.appendChild(createInput('proportional', 'cropX', 'methodLabelTransformCropX', s.cropX || 0, {sourcePath: s.source, dim: 'width'}));
+            methodInputs.appendChild(createInput('proportional', 'cropY', 'methodLabelTransformCropY', s.cropY || 0, {sourcePath: s.source, dim: 'height'}));
+            methodInputs.appendChild(createInput('proportional', 'cropW', 'methodLabelTransformCropW', s.cropW || 1, {sourcePath: s.source, dim: 'width', isDimension: true}));
+            methodInputs.appendChild(createInput('proportional', 'cropH', 'methodLabelTransformCropH', s.cropH || 1, {sourcePath: s.source, dim: 'height', isDimension: true}));
+            methodInputs.appendChild(createInput('number', 'rotate', 'methodLabelTransformRotate', s.rotate || 0, {min: -360, max: 360, step: 1}));
+             break;
+        case 'montage':
+            const overlayControlsContainer = document.createElement('div');
+            overlayControlsContainer.className = 'border-t pt-2 mt-2 space-y-2';
+
+            const overlayCheckbox = createInput('checkbox', 'showOverlay', 'showTargetOverlay', s.showOverlay);
+            overlayControlsContainer.appendChild(overlayCheckbox);
+
+            const opacitySliderContainer = document.createElement('div');
+            opacitySliderContainer.id = 'overlayOpacityContainer';
+            opacitySliderContainer.className = s.showOverlay ? '' : 'hidden'; // Hide/show based on checkbox state
+            opacitySliderContainer.appendChild(createInput('proportional', 'overlayOpacity', 'overlayOpacity', s.overlayOpacity ?? 0.5, {}));
+            overlayControlsContainer.appendChild(opacitySliderContainer);
+
+            methodInputs.appendChild(overlayControlsContainer);
+
+            const montagePartsContainer = document.createElement('div');
+            montagePartsContainer.id = 'montagePartsContainer';
+            montagePartsContainer.className = 'space-y-2 mt-2';
+            methodInputs.appendChild(montagePartsContainer);
+            
+            const addPartButton = document.createElement('button');
+            addPartButton.className = 'w-full mt-2 bg-slate-200 text-slate-700 font-bold py-2 px-3 text-sm rounded-lg hover:bg-slate-300';
+            addPartButton.dataset.langKey = 'addPart';
+            addPartButton.innerHTML = translations[currentLang].addPart;
+            addPartButton.onclick = () => {
+                let mapping = sessionMappings[getFileName(currentMtPath)] || { type: 'montage', sources: { parts: [] }};
+                if (!mapping.sources.parts) mapping.sources.parts = [];
+                mapping.sources.parts.push({ source: '', sx: 0, sy: 0, sw: 1, sh: 1, dx: 0, dy: 0, rotate: 0 });
+                sessionMappings[getFileName(currentMtPath)] = mapping;
+                updateMethodInputs(mapping);
+            };
+            methodInputs.appendChild(addPartButton);
+
+            renderMontageParts(s.parts);
+            
+            break;
+    }
+    
+    if (type === 'montage' || type === 'transform') {
+        methodInputs.appendChild(createCanvasSizeInputs(s));
+    }
+
+
+    methodInputs.querySelectorAll('input, select').forEach(el => {
+        if (!el.classList.contains('proportional-number')) { // Avoid double-binding
+            el.addEventListener('input', handleMethodInputChange);
+        }
+    });
+    methodInputs.querySelectorAll('input[name="colorSourceType"]').forEach(radio => radio.addEventListener('change', handleColorSourceTypeChange));
+    
+    triggerSuggestions();
+    updateMappingPreview();
+};
+
+const handleComposeSourceTypeChange = (event) => {
+    const layerPrefix = event.target.name.replace('SourceType', '');
+    const newType = event.target.value;
+    let mapping = sessionMappings[getFileName(currentMtPath)] || JSON.parse(JSON.stringify(getMappingFromActiveSets(getFileName(currentMtPath)) || {}));
+    if (!mapping.type) mapping.type = 'compose';
+    if (!mapping.sources) mapping.sources = {};
+    mapping.sources[`${layerPrefix}SourceType`] = newType;
+    delete mapping.sources[`${layerPrefix}Image`]; // Clear the selected image when type changes
+    sessionMappings[getFileName(currentMtPath)] = mapping;
+    updateMethodInputs(mapping);
+    updateMappingPreview();
+};
+
+const handleMethodInputChange = (event) => {
+    const target = event.target;
+    const key = target.dataset.sourceKey;
+    if (!key) return;
+    
+    let value;
+
+    if (target.type === 'checkbox') {
+        value = target.checked;
+    } else if (target.type === 'number' || target.type === 'range') {
+        value = parseFloat(target.value);
+    } else {
+        value = target.value;
+    }
+
+    const mtFilename = getFileName(currentMtPath);
+    let mapping = sessionMappings[mtFilename] || JSON.parse(JSON.stringify(getMappingFromActiveSets(mtFilename) || {}));
+    if(!mapping.type) mapping.type = methodSelector.value;
+    if(!mapping.sources) mapping.sources = {};
+    
+    const keyParts = key.split('.');
+    if (keyParts[0] === 'parts') {
+        const [, index, prop] = keyParts;
+        if (!mapping.sources.parts) mapping.sources.parts = [];
+        if (!mapping.sources.parts[index]) mapping.sources.parts[index] = {};
+        mapping.sources.parts[index][prop] = value;
+    } else if (keyParts[0] === 'replaceColors') {
+        const [, index, prop] = keyParts;
+        if (!mapping.sources.replaceColors) mapping.sources.replaceColors = [];
+        if (!mapping.sources.replaceColors[index]) mapping.sources.replaceColors[index] = { color: '#ff00ff' };
+        mapping.sources.replaceColors[index][prop] = value;
+    } else {
+        mapping.sources[key] = value;
+    }
+    sessionMappings[mtFilename] = mapping;
+    
+    if (key === 'showOverlay') {
+        const overlayImage = document.getElementById('previewOverlayImage');
+        overlayImage.classList.toggle('hidden', !value);
+        const opacityContainer = document.getElementById('overlayOpacityContainer');
+        if (opacityContainer) {
+            opacityContainer.classList.toggle('hidden', !value);
+        }
+    }
+
+    if (key === 'overlayOpacity') {
+        const overlayImage = document.getElementById('previewOverlayImage');
+        overlayImage.style.opacity = value;
+    }
+
+    updateMappingPreview();
+    
+    if (key.startsWith('parts.')) {
+        const partIndex = parseInt(key.split('.')[1], 10);
+        const detailsElement = target.closest('details');
+        if (detailsElement) {
+            const canvas = detailsElement.querySelector('.interactive-preview-container canvas');
+            if(canvas && mapping.sources.parts?.[partIndex]) {
+                drawMontageBoxes(canvas, [mapping.sources.parts[partIndex]], 0);
+            }
+        }
+    } else if (mapping.type === 'transform') {
+        const canvas = methodInputs.querySelector('.interactive-preview-container canvas');
+        if (canvas) {
+            drawCropBox(canvas, mapping.sources);
+        }
+    }
+};
+
+const handleColorSourceTypeChange = (event) => {
+    const newType = event.target.value;
+    const mtFilename = getFileName(currentMtPath);
+    let mapping = sessionMappings[mtFilename] || JSON.parse(JSON.stringify(getMappingFromActiveSets(mtFilename) || {}));
+    if (!mapping.type) mapping.type = 'colorize';
+    if (!mapping.sources) mapping.sources = {};
+    mapping.sources.colorSourceType = newType;
+    delete mapping.sources.colorSource;
+    sessionMappings[mtFilename] = mapping;
+    updateMethodInputs(mapping);
+    updateMappingPreview();
+    allMcContainer.classList.add('hidden');
+    showAllMcButton.innerHTML = translations[currentLang].showAllButton;
+};
+
+const makeChangeToSessionMapping = (sourcePath) => {
+    if (!currentMtPath || !currentSourceInput) return;
+    const mtFilename = getFileName(currentMtPath);
+    const type = methodSelector.value;
+    let mapping = sessionMappings[mtFilename] || JSON.parse(JSON.stringify(getMappingFromActiveSets(mtFilename) || { type, sources: {} }));
+    if (mapping.type !== type) {
+        mapping.type = type;
+        mapping.sources = {};
+    }
+
+    if (currentSourceInput.startsWith('parts.')) {
+         const [, index, prop] = currentSourceInput.split('.');
+         if (!mapping.sources.parts) mapping.sources.parts = [];
+         if (!mapping.sources.parts[index]) mapping.sources.parts[index] = {};
+         mapping.sources.parts[index][prop] = sourcePath;
+    } else {
+        mapping.sources[currentSourceInput] = sourcePath;
+    }
+    
+    if (type === 'colorize' && currentSourceInput === 'colorSource') {
+        mapping.sources.colorSourceType = document.querySelector('input[name="colorSourceType"]:checked')?.value || 'minecraft';
+    }
+    sessionMappings[mtFilename] = mapping;
+    renderLists();
+    updateMethodInputs(sessionMappings[mtFilename]);
+    currentSourceInput = null;
+    suggestionContainer.classList.add('hidden');
+};
+
+const handleCloneMapping = () => {
+    const mtFilename = getFileName(currentMtPath);
+    const currentMapping = sessionMappings[mtFilename] || getMappingFromActiveSets(mtFilename);
+    if (!currentMapping) {
+        alert(translations[currentLang].noChangesAlert);
+        return;
+    }
+    _clonedMapping = JSON.parse(JSON.stringify(currentMapping));
+    convertStatus.innerHTML = `<i class="fas fa-clone mr-2 text-teal-500"></i> ${translations[currentLang].cloningStatus}`;
+    closeModal.click();
+};
+
+
+const handleSaveMapping = () => {
+    const mtFilename = getFileName(currentMtPath);
+    const mappingToSave = sessionMappings[mtFilename];
+    if (!mappingToSave) { alert(translations[currentLang].noChangesAlert); return; }
+    _saveContext = { isSavingAll: false, mtPath: currentMtPath, mapping: mappingToSave };
+    openSaveModal();
+};
+
+const handleSaveAsNewTexture = () => {
+    const mtFilename = getFileName(currentMtPath);
+    let mappingToSave = sessionMappings[mtFilename];
+    if (!mappingToSave) {
+        const savedMapping = getMappingFromActiveSets(mtFilename);
+        if (savedMapping) mappingToSave = JSON.parse(JSON.stringify(savedMapping));
+    }
+    if (!mappingToSave) { alert(translations[currentLang].noChangesAlert); return; }
+    
+    _saveContext = { isSavingGenerated: true, mapping: mappingToSave };
+    openSaveModal();
+};
+
+
+const handleSaveAllSessionMappings = () => {
+    const sessionKeys = Object.keys(sessionMappings);
+    if (sessionKeys.length === 0) { alert(translations[currentLang].noSessionChangesAlert); return; }
+    _saveContext = { isSavingAll: true, mappings: sessionMappings };
+    openSaveModal();
+};
+
+const openSaveModal = () => {
+    const setNames = Object.keys(ruleSets);
+    if (setNames.length === 0) { alert(translations[currentLang].noRuleSetAlert); return; }
+    saveSetSelector.innerHTML = setNames.map(name => `<option value="${name}">${name}</option>`).join('');
+
+    if (_saveContext.isSavingAll) {
+        saveModalTitle.textContent = translations[currentLang].saveToSetTitle;
+        saveModalMessage.textContent = `${Object.keys(_saveContext.mappings).length} session mappings will be saved.`;
+    } else if (_saveContext.isSavingGenerated) {
+        saveModalTitle.textContent = translations[currentLang].saveGeneratedToSetTitle;
+        saveModalMessage.textContent = `The recipe for 'generated_${getFileName(currentMtPath)}' will be saved.`;
+    } else {
+        saveModalTitle.textContent = translations[currentLang].saveToSetTitle;
+        saveModalMessage.textContent = `Changes for '${getFileName(_saveContext.mtPath)}' will be saved.`;
+    }
+    saveModal.classList.remove('hidden');
+};
+
+const confirmSave = async () => {
+    const selectedSet = saveSetSelector.value;
+    if (!selectedSet || !ruleSets[selectedSet]) { alert(translations[currentLang].selectRuleSetAlert); return; }
+
+    if (_saveContext.isSavingGenerated) {
+        const mtFilename = getFileName(currentMtPath);
+        const resolvedMapping = JSON.parse(JSON.stringify(_saveContext.mapping));
+        if (resolvedMapping.type === 'colorize' && resolvedMapping.sources.colorSourceType === 'self') {
+            resolvedMapping.sources.colorSource = currentMtPath; 
+            resolvedMapping.sources.colorSourceType = 'minetest';
+        }
+        const newFileName = `generated_${mtFilename}`;
+        const newPath = `generated/${newFileName}`;
+
+        if (!ruleSets[selectedSet].generated) ruleSets[selectedSet].generated = {};
+        ruleSets[selectedSet].generated[newPath] = resolvedMapping;
+        saveStateToLocal();
+        await processGeneratedTextures();
+        renderLists();
+        convertStatus.innerHTML = `<i class="fas fa-check-circle text-green-500 mr-2"></i> ${translations[currentLang].statusNewTextureSaved.replace('{fileName}', newFileName)}`;
+        setTimeout(() => { if (convertStatus.innerHTML.includes(newFileName)) { convertStatus.innerHTML = ''; } }, 4000);
+    } else {
+        const saveMapping = (mtFilename, mapping) => {
+            for (const setName in ruleSets) {
+                if (ruleSets[setName].mappings[mtFilename]) {
+                    delete ruleSets[setName].mappings[mtFilename];
+                }
+            }
+            ruleSets[selectedSet].mappings[mtFilename] = mapping;
+        };
+
+        if (_saveContext.isSavingAll) {
+            const mappingsToSave = _saveContext.mappings;
+            for (const mtFilename in mappingsToSave) {
+                saveMapping(mtFilename, mappingsToSave[mtFilename]);
+            }
+            sessionMappings = {};
+        } else {
+            const keyToSave = getFileName(_saveContext.mtPath);
+            saveMapping(keyToSave, _saveContext.mapping);
+            delete sessionMappings[keyToSave];
+        }
+        saveStateToLocal();
+    }
+    
+    closeSaveModal();
+    if(mappingModal.classList.contains('hidden')) {
+        renderLists();
+    } else {
+        closeModal.click();
+    }
+};
+
+const closeSaveModal = () => { saveModal.classList.add('hidden'); _saveContext = {}; }
+const showConfirm = (message, onConfirm, titleKey = 'confirmTitle') => { _confirmCallback = onConfirm; confirmTitleEl.dataset.langKey = titleKey; confirmTitleEl.textContent = translations[currentLang][titleKey]; confirmMessage.textContent = message; confirmModal.classList.remove('hidden'); };
+const handleConfirm = (isYes) => { confirmModal.classList.add('hidden'); if (isYes && _confirmCallback) { _confirmCallback(); } _confirmCallback = null; };
+const clearSessionMapping = () => { showConfirm(translations[currentLang].confirmClearSession, () => { if (currentMtPath && sessionMappings[getFileName(currentMtPath)]) { delete sessionMappings[getFileName(currentMtPath)]; } closeModal.click(); }); };
+const getMappingFromActiveSets = (mtFilename) => { for (const setName in ruleSets) { if (ruleSets[setName].active && ruleSets[setName].mappings[mtFilename]) return ruleSets[setName].mappings[mtFilename]; } return null; };
+
+const runConversion = async () => {
+    convertButton.disabled = true;
+    convertStatus.innerHTML = `<div class="spinner w-5 h-5 border-2 rounded-full"></div><span class="ml-2">${translations[currentLang].statusProcessing}</span>`;
+    
+    const finalMappings = {};
+    for (const setName in ruleSets) {
+        if (ruleSets[setName].active) { 
+            Object.assign(finalMappings, ruleSets[setName].mappings);
+        }
+    }
+    Object.assign(finalMappings, sessionMappings);
+    
+    const outputZip = new JSZip();
+    let processedCount = 0;
+
+    for (const mtTexture of mtTextures) {
+        const mtFilename = getFileName(mtTexture.path);
+        const mapping = finalMappings[mtFilename];
+
+        if (mapping) {
+            processedCount++;
+            convertStatus.innerHTML = `<div class="spinner w-5 h-5 border-2 rounded-full"></div><span class="ml-2">(${processedCount}/${Object.keys(finalMappings).length}) ${mtFilename}</span>`;
+            try {
+                const resultBase64 = await processSingleMapping(mapping, mtTexture.path);
+                if (resultBase64) {
+                    outputZip.file(mtTexture.path, resultBase64, { base64: true });
+                }
+            } catch(e) { console.error(`Error converting ${mtFilename}:`, e); }
+        }
+    }
+
+    outputZip.file("description.txt", `${processedCount} textures converted with Studio.`);
+    convertStatus.textContent = translations[currentLang].statusZipping;
+    try {
+        const content = await outputZip.generateAsync({ type: "blob" });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = 'converted_texture_pack.zip';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+        convertStatus.innerHTML = `<i class="fas fa-check-circle text-green-500 mr-2"></i> ${translations[currentLang].statusDone}`;
+    } catch(e) {
+        convertStatus.innerHTML = `<i class="fas fa-times-circle text-red-500 mr-2"></i> ${translations[currentLang].statusZipError}`;
+        console.error(e);
+    }
+    setTimeout(() => { convertStatus.innerHTML = ''; }, 5000);
+    convertButton.disabled = false;
+};
+
+// --- SCORING WORKER ---
+const workerCode = () => {
+    const getFileName = (path) => path ? path.split('/').pop() : '';
+
+    const compareNames = (name1, name2) => {
+        const cleanName1 = getFileName(name1).replace('.png', '').toLowerCase();
+        const cleanName2 = getFileName(name2).replace('.png', '').toLowerCase();
+
+        if (cleanName1 === cleanName2) return 1.0;
+
+        // Prioritize substring matching with a high base score
+        if (cleanName1.includes(cleanName2) || cleanName2.includes(cleanName1)) {
+            const len1 = cleanName1.length;
+            const len2 = cleanName2.length;
+            const ratio = Math.min(len1, len2) / Math.max(len1, len2);
+            return 0.8 + (ratio * 0.2); // e.g., "brick" vs "bricks" will be > 0.95
+        }
+        
+        // Fallback to token-based Jaccard similarity
+        const tokenize = (str) => new Set(str.split(/[_-\s]/).filter(Boolean));
+        const set1 = tokenize(cleanName1);
+        const set2 = tokenize(cleanName2);
+
+        if (set1.size === 0 || set2.size === 0) return 0;
+        
+        const intersection = new Set([...set1].filter(x => set2.has(x)));
+        const union = new Set([...set1, ...set2]);
+        const jaccardScore = intersection.size / union.size;
+        
+        // Penalize if token sets are very different in size
+        const sizeRatio = Math.min(set1.size, set2.size) / Math.max(set1.size, set2.size);
+
+        return jaccardScore * sizeRatio * 0.7; // Scale down to ensure substring match is superior
+    };
+    
+    const calculateSSIM = (gray1, gray2, w, h) => {
+        const K1 = 0.01, K2 = 0.03, L = 255;
+        const C1 = (K1 * L) ** 2;
+        const C2 = (K2 * L) ** 2;
+        const N = w * h;
+
+        let mu1 = 0, mu2 = 0;
+        for (let i = 0; i < N; i++) {
+            mu1 += gray1[i];
+            mu2 += gray2[i];
+        }
+        mu1 /= N;
+        mu2 /= N;
+
+        let var1 = 0, var2 = 0, cov = 0;
+        for (let i = 0; i < N; i++) {
+            const diff1 = gray1[i] - mu1;
+            const diff2 = gray2[i] - mu2;
+            var1 += diff1 * diff1;
+            var2 += diff2 * diff2;
+            cov += diff1 * diff2;
+        }
+        // Using sample variance (N-1) for potentially better results with small samples
+        var1 /= (N - 1);
+        var2 /= (N - 1);
+        cov /= (N - 1);
+
+        const numerator = (2 * mu1 * mu2 + C1) * (2 * cov + C2);
+        const denominator = (mu1 * mu1 + mu2 * mu2 + C1) * (var1 + var2 + C2);
+        
+        if (denominator === 0) {
+            return numerator === 0 ? 1 : 0;
+        }
+
+        const ssim = numerator / denominator;
+        return Math.max(0, ssim); // Clamp at 0, SSIM can be negative but we only care about similarity
+    };
+
+    const compareColorHistograms = (h1, h2) => {
+        let distance = 0;
+        for (let i = 0; i < h1.length; i++) {
+            distance += Math.abs(h1[i] - h2[i]);
+        }
+        // The distance is between 0 and 2. Normalize to a similarity score between 0 and 1.
+        return 1 - (distance / 2);
+    };
+
+    self.onmessage = ({ data }) => {
+        const { mtAnalyses, mcAnalyses, mtPaths, mcPaths } = data;
+
+        for (let i = 0; i < mtPaths.length; i++) {
+            const mtPath = mtPaths[i];
+            const mtAnalysis = mtAnalyses[i];
+            if (!mtAnalysis) continue;
+
+            const scoresForTarget = {};
+            for (let j = 0; j < mcPaths.length; j++) {
+                const mcPath = mcPaths[j];
+                const mcAnalysis = mcAnalyses[j];
+                if (!mcAnalysis) continue;
+
+                const structureScore = calculateSSIM(mtAnalysis.grayscale, mcAnalysis.grayscale, mtAnalysis.width, mtAnalysis.height);
+                const colorScore = compareColorHistograms(mtAnalysis.colorHistogram, mcAnalysis.colorHistogram);
+                const nameScore = compareNames(mtPath, mcPath);
+                scoresForTarget[mcPath] = { structureScore, colorScore, nameScore };
+            }
+            
+            self.postMessage({
+                type: 'progress',
+                path: mtPath,
+                scores: scoresForTarget,
+                progress: { current: i + 1, total: mtPaths.length }
+            });
+        }
+
+        self.postMessage({ type: 'complete' });
+    };
+};
+
+// --- VISUAL SIMILARITY ANALYSIS ---
+const getColorHistogram = (imageData) => {
+    const data = imageData.data;
+    const H_BINS = 12;
+    const S_BINS = 4;
+    const L_BINS = 4;
+    let histogram = new Array(H_BINS * S_BINS * L_BINS).fill(0);
+    let pixelCount = 0;
+
+    for (let i = 0; i < data.length; i += 4) {
+        const alpha = data[i + 3];
+        // Only consider reasonably opaque pixels
+        if (alpha < 128) continue; 
+        
+        pixelCount++;
+
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        const [h, s, l] = rgbToHsl(r, g, b);
+
+        const hBin = Math.floor(h / (360 / H_BINS)) % H_BINS;
+        const sBin = Math.floor(s * S_BINS);
+        const lBin = Math.floor(l * L_BINS);
+
+        const index = hBin * (S_BINS * L_BINS) + sBin * L_BINS + lBin;
+        histogram[index]++;
+    }
+
+    if (pixelCount > 0) {
+        for (let i = 0; i < histogram.length; i++) {
+            histogram[i] /= pixelCount;
+        }
+    }
+    return histogram;
+};
+
+const getGrayscale = (imageData) => {
+    const grayscale = new Uint8Array(imageData.width * imageData.height);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] < 128) { // If pixel is more than 50% transparent
+            grayscale[i / 4] = 255; // Treat as white
+        } else {
+            grayscale[i / 4] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        }
+    }
+    return grayscale;
+};
+
+const analyzeTexture = async (texture) => {
+    if (!texture || !texture.img) return null;
+    if (analysisCache.has(texture.path)) {
+        return analysisCache.get(texture.path);
+    }
+    try {
+        const img = texture.img;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        
+        canvas.width = ANALYSIS_SIZE;
+        canvas.height = ANALYSIS_SIZE;
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, 0, 0, ANALYSIS_SIZE, ANALYSIS_SIZE);
+        
+        const imageData = ctx.getImageData(0, 0, ANALYSIS_SIZE, ANALYSIS_SIZE);
+        const colorHistogram = getColorHistogram(imageData);
+        const grayscale = getGrayscale(imageData);
+        
+        const result = { colorHistogram, grayscale, width: ANALYSIS_SIZE, height: ANALYSIS_SIZE };
+        analysisCache.set(texture.path, result);
+        return result;
+    } catch(e) {
+        console.error("Error analyzing texture:", texture.path, e);
+        return null;
+    }
+};
+
+const startAnalysisAndScoring = async () => {
+    if (scoringWorker) {
+        scoringWorker.terminate();
+        scoringWorker = null;
+    }
+    similarityMatrix = {};
+    analysisCache.clear();
+
+    // Phase 1: Analyze all textures on the main thread (fast, involves canvas)
+    const allTextures = [...mtTextures, ...mcTextures];
+    for (let i = 0; i < allTextures.length; i++) {
+        await analyzeTexture(allTextures[i]);
+        if (i % 50 === 0 || i === allTextures.length - 1) {
+            const statusText = translations[currentLang].statusAnalyzing
+                .replace('{current}', i + 1)
+                .replace('{total}', allTextures.length);
+            convertStatus.innerHTML = `<div class="spinner w-4 h-4 border-2 rounded-full"></div><span class="ml-2">${statusText}</span>`;
+            await new Promise(resolve => setTimeout(resolve, 0)); // Yield to UI
+        }
+    }
+
+    // Phase 2: Hand off scoring to the Web Worker
+    const mtAnalyses = mtTextures.map(t => analysisCache.get(t.path));
+    const mcAnalyses = mcTextures.map(t => analysisCache.get(t.path));
+    const mtPaths = mtTextures.map(t => t.path);
+    const mcPaths = mcTextures.map(t => t.path);
+
+    const workerBlob = new Blob(['(', workerCode.toString(), ')()'], { type: 'application/javascript' });
+    scoringWorker = new Worker(URL.createObjectURL(workerBlob));
+    
+    scoringWorker.onmessage = ({ data }) => {
+        if (data.type === 'progress') {
+            similarityMatrix[data.path] = data.scores;
+            
+            const statusText = translations[currentLang].statusScoringProgress
+                .replace('{current}', data.progress.current)
+                .replace('{total}', data.progress.total);
+            convertStatus.innerHTML = `<div class="spinner w-4 h-4 border-2 rounded-full"></div><span class="ml-2">${statusText}</span>`;
+            
+            if (_quickMatchUpdateCallback && _quickMatchUpdateCallback.path === data.path) {
+                _quickMatchUpdateCallback.callback();
+                _quickMatchUpdateCallback = null;
+            }
+        } else if (data.type === 'complete') {
+            convertStatus.innerHTML = '';
+            if (scoringWorker) {
+                 scoringWorker.terminate();
+                 scoringWorker = null;
+            }
+        }
+    };
+    
+    scoringWorker.postMessage({ mtAnalyses, mcAnalyses, mtPaths, mcPaths });
+};
+
+
+const getSimilarityScores = (targetTexture, sourceArray, useQuickMatchSliders = false) => {
+    if (!targetTexture || !similarityMatrix[targetTexture.path]) return [];
+
+    const colorWeight = parseFloat(useQuickMatchSliders ? quickMatchColorSlider.value : colorSlider.value);
+    const structureWeight = parseFloat(useQuickMatchSliders ? quickMatchStructureSlider.value : structureSlider.value);
+    const nameWeight = parseFloat(useQuickMatchSliders ? quickMatchNameSlider.value : nameSlider.value);
+    const totalWeight = colorWeight + structureWeight + nameWeight;
+
+    const scoresForTarget = similarityMatrix[targetTexture.path];
+
+    const scoredTextures = sourceArray.map(sourceTex => {
+        const rawScores = scoresForTarget[sourceTex.path];
+        if (!rawScores) return { ...sourceTex, totalScore: -1 };
+
+        let totalScore = 0;
+        if (totalWeight > 0) {
+            totalScore = (
+                (rawScores.structureScore * structureWeight) +
+                (rawScores.colorScore * colorWeight) +
+                (rawScores.nameScore * nameWeight)
+            ) / totalWeight;
+        }
+        return { ...sourceTex, totalScore };
+    });
+
+    return scoredTextures.filter(t => t.totalScore >= 0).sort((a, b) => b.totalScore - a.totalScore);
+};
+
+const triggerSuggestions = () => {
+    if (!currentMtPath || !currentSourceInput) {
+        suggestionContainer.classList.add('hidden');
+        return;
+    }
+
+    const targetTexture = findTextureByPath(currentMtPath, mtTextures);
+    if (!targetTexture) {
+        suggestionList.innerHTML = `<li>Error: Target texture not found.</li>`;
+        return;
+    }
+
+    let sourceArrayForSuggestions;
+    const mtFilename = getFileName(currentMtPath);
+    const mapping = sessionMappings[mtFilename] || getMappingFromActiveSets(mtFilename) || {};
+    const s = mapping.sources || {};
+
+    if ((currentSourceInput === 'colorSource' && s.colorSourceType === 'minetest') ||
+        (currentSourceInput === 'baseImage' && s.baseSourceType === 'minetest') ||
+        (currentSourceInput === 'topImage' && s.topSourceType === 'minetest')) {
+        sourceArrayForSuggestions = mtTextures;
+    } else {
+        sourceArrayForSuggestions = mcTextures;
+    }
+    
+    // Check if scores are ready.
+    if (!similarityMatrix[targetTexture.path]) {
+        suggestionList.innerHTML = `<li><div class="p-2 text-center text-sm text-slate-500">${translations[currentLang].calculatingSuggestions}</div></li>`;
+        suggestionContainer.classList.remove('hidden');
+        return;
+    }
+
+    const scoredTextures = getSimilarityScores(targetTexture, sourceArrayForSuggestions);
+
+    suggestionList.innerHTML = '';
+    if (scoredTextures && scoredTextures.length > 0) {
+        scoredTextures.slice(0, 10).forEach(tex => suggestionList.appendChild(createMcListItemForModal(tex, true)));
+        suggestionContainer.classList.remove('hidden');
+    } else {
+        suggestionList.innerHTML = `<li><div class="p-2 text-center text-sm text-slate-500">${translations[currentLang].noResultsFound}</div></li>`;
+    }
+};
+
+const renderModalAllMcList = () => {
+    const filter = modalSearchInput.value.toLowerCase();
+    
+    let sourceArray;
+    let headerKey;
+    
+    const mtFilename = getFileName(currentMtPath);
+    const mapping = sessionMappings[mtFilename] || getMappingFromActiveSets(mtFilename) || {};
+    const s = mapping.sources || {};
+
+    if ((currentSourceInput === 'colorSource' && s.colorSourceType === 'minetest') ||
+        (currentSourceInput === 'baseImage' && s.baseSourceType === 'minetest') ||
+        (currentSourceInput === 'topImage' && s.topSourceType === 'minetest')) {
+        sourceArray = mtTextures;
+        headerKey = 'allMtLabel';
+    } else {
+        sourceArray = mcTextures;
+        headerKey = 'allMcLabel';
+    }
+
+    modalAllMcList.innerHTML = '';
+    allMcHeader.textContent = translations[currentLang][headerKey];
+    
+    sourceArray
+        .filter(tex => tex.filename.toLowerCase().includes(filter))
+        .forEach(tex => modalAllMcList.appendChild(createMcListItemForModal(tex)));
+};
+
+const createMcListItemForModal = (texture, showScore = false) => {
+    const li = document.createElement('li');
+    li.className = 'texture-list-item flex items-center gap-3 p-2 rounded-md cursor-pointer';
+    
+    let scoreHtml = '';
+    if (showScore && typeof texture.totalScore === 'number' && texture.totalScore >= 0) {
+        const scorePercent = Math.round(texture.totalScore * 100);
+        scoreHtml = `<span class="ml-auto text-xs font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">${scorePercent}%</span>`;
+    }
+
+    li.innerHTML = `
+        <img src="${texture.thumbnailUrl}" class="w-8 h-8 object-contain bg-slate-200 rounded" style="image-rendering: pixelated;">
+        <span class="font-mono text-xs text-slate-700 block truncate">${texture.filename}</span>
+        ${scoreHtml}
+    `;
+    li.addEventListener('click', () => makeChangeToSessionMapping(texture.path));
+    return li;
+};
+
+// --- QUICK MATCH VIEW ---
+const openQuickMatchView = () => {
+    quickMatchSessionMappings = {};
+    currentQuickMatchMt = null;
+    lastScoredSources = [];
+    mapperView.classList.add('hidden');
+    quickMatchView.classList.remove('hidden');
+    // Sync slider values when opening
+    quickMatchColorSlider.value = colorSlider.value;
+    quickMatchStructureSlider.value = structureSlider.value;
+    quickMatchNameSlider.value = nameSlider.value;
+    renderQuickMatchView();
+};
+
+const saveAndCloseQuickMatchView = () => {
+    Object.assign(sessionMappings, quickMatchSessionMappings);
+    quickMatchSessionMappings = {};
+    currentQuickMatchMt = null;
+    lastScoredSources = [];
+    _quickMatchUpdateCallback = null; // Clear any pending callbacks
+    quickMatchView.classList.add('hidden');
+    mapperView.classList.remove('hidden');
+    renderLists();
+};
+
+const renderQuickMatchMcList = () => {
+    const mcListContainer = quickMatchMcList;
+    const mcFilter = quickMatchSearchMc.value.toLowerCase();
+    
+    let mappedSourcePath = null;
+    if (currentQuickMatchMt) {
+        const mtFilename = getFileName(currentQuickMatchMt.path);
+        const sessionMapping = quickMatchSessionMappings[mtFilename];
+        const savedMapping = getMappingFromActiveSets(mtFilename);
+        const currentMapping = sessionMapping || savedMapping;
+        if (currentMapping && currentMapping.sources && (currentMapping.sources.source || currentMapping.type === 'create_chest')) {
+            mappedSourcePath = currentMapping.sources.source || "assets/minecraft/textures/entity/chest/normal.png";
+        }
+    }
+
+    mcListContainer.innerHTML = '';
+    const filteredSources = lastScoredSources.filter(t => t.filename.toLowerCase().includes(mcFilter));
+
+    if (filteredSources.length === 0) {
+        mcListContainer.innerHTML = `<div class="p-4 text-center text-slate-500">${translations[currentLang].noResultsFound}</div>`;
+        return;
+    }
+
+    filteredSources.forEach(mcTex => {
+        const li = document.createElement('li');
+        const isMatched = mappedSourcePath === mcTex.path;
+        li.className = `quick-match-item flex items-center gap-3 p-2 cursor-pointer ${isMatched ? 'matched' : ''}`;
+        const scorePercent = Math.round(mcTex.totalScore * 100);
+        li.innerHTML = `
+            <img src="${mcTex.thumbnailUrl}" class="w-8 h-8 object-contain bg-slate-200 rounded" style="image-rendering: pixelated;">
+            <span class="font-mono text-xs text-slate-700 block truncate flex-grow">${mcTex.filename}</span>
+            <span class="text-xs font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">${scorePercent}%</span>
+            <button class="advanced-edit-btn text-slate-400 hover:text-indigo-600 p-1" title="${translations[currentLang].advancedEditTooltip}"><i class="fas fa-edit"></i></button>
+        `;
+        li.querySelector('.advanced-edit-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            openMappingModal(currentQuickMatchMt.path, mcTex.path);
+        });
+        li.addEventListener('click', () => {
+            quickMatchSessionMappings[getFileName(currentQuickMatchMt.path)] = { type: 'rename', sources: { source: mcTex.path } };
+            renderQuickMatchView(); // Re-render to show mapping icon and highlight
+        });
+        mcListContainer.appendChild(li);
+    });
+};
+
+const renderQuickMatchView = () => {
+    const mtFilter = quickMatchSearchMt.value.toLowerCase();
+
+    quickMatchMtList.innerHTML = '';
+    mtTextures
+        .filter(t => !getMappingFromActiveSets(getFileName(t.path)) && t.filename.toLowerCase().includes(mtFilter))
+        .forEach(mtTex => {
+            const li = document.createElement('li');
+            li.className = `quick-match-item flex items-center gap-3 p-2 cursor-pointer border-l-4 ${currentQuickMatchMt?.path === mtTex.path ? 'selected' : 'border-transparent'}`;
+            const mtFilename = getFileName(mtTex.path);
+            const isMapped = !!quickMatchSessionMappings[mtFilename];
+            li.innerHTML = `
+                ${isMapped ? '<i class="fas fa-link text-indigo-500 w-4 text-center"></i>' : '<i class="far fa-circle text-slate-300 w-4 text-center"></i>'}
+                <img src="${mtTex.thumbnailUrl}" class="w-8 h-8 object-contain bg-slate-200 rounded" style="image-rendering: pixelated;">
+                <span class="font-mono text-xs text-slate-700 block truncate">${mtTex.filename}</span>
+            `;
+            li.addEventListener('click', () => {
+                if (currentQuickMatchMt?.path !== mtTex.path) {
+                    currentQuickMatchMt = mtTex;
+                    _quickMatchUpdateCallback = null; // Clear previous callback
+                    renderQuickMatchView();
+                }
+            });
+            quickMatchMtList.appendChild(li);
+        });
+
+    const mcListContainer = quickMatchMcList;
+    const selectedMt = currentQuickMatchMt;
+
+    if (!selectedMt) {
+        mcListContainer.innerHTML = `<div class="p-4 text-center text-slate-500">${translations[currentLang].quickMatchPrompt}</div>`;
+        return;
+    }
+    
+    if (similarityMatrix[selectedMt.path]) {
+        lastScoredSources = getSimilarityScores(selectedMt, mcTextures.filter(t => !t.path.startsWith('generated/')), true);
+        renderQuickMatchMcList();
+    } else {
+        mcListContainer.innerHTML = `<div class="p-4 text-center text-slate-500"><div class="spinner w-6 h-6 border-2 rounded-full mx-auto"></div><p class="mt-2">${translations[currentLang].calculatingSuggestions}</p></div>`;
+        // Register a callback to be fired when data is ready
+        _quickMatchUpdateCallback = {
+            path: selectedMt.path,
+            callback: () => {
+                // Check if the user is still looking at the same item
+                if (currentQuickMatchMt && currentQuickMatchMt.path === selectedMt.path) {
+                    renderQuickMatchView();
+                }
+            }
+        };
+    }
+};
+
+const updateMappingPreview = async () => {
+    const placeholder = 'https://placehold.co/128x128/e2e8f0/64748b?text=...';
+    const checkerboardDiv = previewImage.parentElement;
+    const overlayImage = document.getElementById('previewOverlayImage');
+    previewImage.src = placeholder;
+    checkerboardDiv.style.width = 'auto';
+    checkerboardDiv.style.height = 'auto';
+    
+    let mapping = sessionMappings[getFileName(currentMtPath)] || getMappingFromActiveSets(getFileName(currentMtPath));
+    if (!mapping) { 
+        previewImage.src = 'https://placehold.co/128x128/e2e8f0/64748b?text=Missing'; 
+        overlayImage.classList.add('hidden');
+        return;
+    }
+    
+    if (mapping.type === 'montage') {
+        overlayImage.src = findTextureByPath(currentMtPath, mtTextures)?.url || '';
+        overlayImage.classList.toggle('hidden', !mapping.sources?.showOverlay);
+        overlayImage.style.opacity = mapping.sources?.overlayOpacity ?? 0.5;
+    } else {
+        overlayImage.classList.add('hidden');
+    }
+
+    try { 
+        const resultBase64 = await processSingleMapping(mapping, currentMtPath);
+        if (resultBase64) {
+            const dataUrl = `data:image/png;base64,${resultBase64}`;
+            const img = await loadImage(dataUrl);
+            checkerboardDiv.style.width = `${img.width}px`;
+            checkerboardDiv.style.height = `${img.height}px`;
+            overlayImage.style.width = `${img.width}px`;
+            overlayImage.style.height = `${img.height}px`;
+            previewImage.src = dataUrl;
+
+            if (isFirstPreviewLoad) {
+                const containerW = previewContainer.clientWidth;
+                const containerH = previewContainer.clientHeight;
+                if (img.width > 0 && img.height > 0 && containerW > 0 && containerH > 0) {
+                    const scale = Math.min(containerW / img.width, containerH / img.height);
+                    const clampedScale = Math.max(parseFloat(previewZoom.min), Math.min(parseFloat(previewZoom.max), scale));
+                    previewZoom.value = clampedScale;
+                    checkerboardDiv.style.transform = `scale(${clampedScale})`;
+                }
+                isFirstPreviewLoad = false;
+            }
+
+        } else {
+            previewImage.src = 'https://placehold.co/128x128/e2e8f0/64748b?text=Select Source';
+        } 
+    } catch(e) { 
+        console.error("Preview Error:", e); 
+        previewImage.src = 'https://placehold.co/128x128/e2e8f0/64748b?text=Error';
+    } 
+};
+
+const processSingleMapping = async (mapping, mtPath) => {
+    const { type, sources } = mapping;
+    if (!sources) return null;
+    let s = { ...sources }; // Create a copy to avoid modifying the original object
+
+    let tempCanvas = document.createElement('canvas');
+    let tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+    tempCtx.imageSmoothingEnabled = false;
+
+    
+    switch(type) {
+        case 'rename':
+            const renameImg = await getImage(s.source);
+            if(!renameImg) return null;
+            tempCanvas.width = renameImg.width;
+            tempCanvas.height = renameImg.height;
+            tempCtx.drawImage(renameImg, 0, 0);
+            break;
+        case 'compose_door':
+            const lowerImg = await getImage(s.lower);
+            const upperImg = await getImage(s.upper);
+            if (!lowerImg || !upperImg) return null;
+            const w = lowerImg.width;
+            const h = lowerImg.height;
+            const panelCanvas = document.createElement('canvas');
+            panelCanvas.width = w;
+            panelCanvas.height = h * 2;
+            const panelCtx = panelCanvas.getContext('2d');
+            panelCtx.imageSmoothingEnabled = false;
+            panelCtx.drawImage(upperImg, 0, 0);
+            panelCtx.drawImage(lowerImg, 0, h);
+
+            const flippedPanelCanvas = document.createElement('canvas');
+            flippedPanelCanvas.width = w;
+            flippedPanelCanvas.height = h * 2;
+            const flippedCtx = flippedPanelCanvas.getContext('2d');
+            flippedCtx.imageSmoothingEnabled = false;
+            flippedCtx.translate(w, 0);
+            flippedCtx.scale(-1, 1);
+            flippedCtx.drawImage(panelCanvas, 0, 0);
+            
+            const fullDoorCanvas = document.createElement('canvas');
+            fullDoorCanvas.width = w * 2;
+            fullDoorCanvas.height = h * 2;
+            const fullDoorCtx = fullDoorCanvas.getContext('2d');
+            fullDoorCtx.imageSmoothingEnabled = false;
+            
+            fullDoorCtx.drawImage(flippedPanelCanvas, 0, 0);
+            fullDoorCtx.save();
+            fullDoorCtx.translate(w * 2, 0);
+            fullDoorCtx.scale(-1, 1);
+            fullDoorCtx.drawImage(flippedPanelCanvas, 0, 0);
+            fullDoorCtx.restore();
+
+            const sideCropXRatio = 0.41;
+            const sideCropWRatio = 0.2;
+            const sideCropX = fullDoorCanvas.width * sideCropXRatio;
+            const sideCropWidth = fullDoorCanvas.width * sideCropWRatio;
+
+            tempCanvas.width = fullDoorCanvas.width + sideCropWidth;
+            tempCanvas.height = h * 2;
+
+            tempCtx.drawImage(fullDoorCanvas, 0, 0);
+            tempCtx.drawImage(
+                fullDoorCanvas, sideCropX, 0, sideCropWidth, h * 2,
+                w * 2, 0, sideCropWidth, h * 2
+            );
+            break;
+        case 'create_chest':
+            const chestSourceImg = await getImage(s.source);
+            if(!chestSourceImg) return null;
+            const W = chestSourceImg.width;
+            const chestPart = s.chestPart || (getFileName(mtPath).includes('top') ? 'top' : (getFileName(mtPath).includes('side') ? 'side' : (getFileName(mtPath).includes('inside') ? 'inside' : 'front')));
+            const recipe = chestRecipes[chestPart];
+            if (!recipe) return null;
+
+            if (recipe.type === 'transform') {
+                const p = recipe.sources;
+                const cropW = p.cropW * W; const cropH = p.cropH * W;
+                tempCanvas.width = cropW; tempCanvas.height = cropH;
+                tempCtx.drawImage(chestSourceImg, p.cropX * W, p.cropY * W, cropW, cropH, 0, 0, cropW, cropH);
+            } else if (recipe.type === 'montage') {
+                const p = recipe.sources;
+                tempCanvas.width = p.canvasW * W; tempCanvas.height = p.canvasH * W;
+                (p.parts || []).forEach(part => {
+                    const sx = part.sx * W, sy = part.sy * W, sw = part.sw * W, sh = part.sh * W;
+                    const dx = part.dx * W, dy = part.dy * W, rot = part.rotate || 0;
+                    tempCtx.save();
+                    tempCtx.translate(dx + sw / 2, dy + sh / 2);
+                    tempCtx.rotate(rot * Math.PI / 180);
+                    tempCtx.drawImage(chestSourceImg, sx, sy, sw, sh, -sw / 2, -sh / 2, sw, sh);
+                    tempCtx.restore();
+                });
+            } else { return null; }
+            break;
+        case 'colorize': {
+            const baseImg = await getImage(s.base);
+            if (!baseImg) return null;
+            let colorData;
+            const colorSourceType = s.colorSourceType || 'minecraft';
+
+            if (colorSourceType === 'specific_color') {
+                const hex = s.colorValue || '#FFFFFF';
+                colorData = [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+            } else {
+                const colorSourcePath = colorSourceType === 'self' ? mtPath : s.colorSource;
+                let colorImg = await getImage(colorSourcePath);
+
+                if (!colorImg) return null;
+                const colorCanvas = document.createElement('canvas'), colorCtx = colorCanvas.getContext('2d');
+                colorCanvas.width = colorImg.width; colorCanvas.height = colorImg.height;
+                colorCtx.drawImage(colorImg, 0, 0);
+                const pixelX = Math.floor((s.colorX || 0) * colorImg.width);
+                const pixelY = Math.floor((s.colorY || 0) * colorImg.height);
+                colorData = colorCtx.getImageData(pixelX, pixelY, 1, 1).data;
+            }
+            
+            tempCanvas.width = baseImg.width; tempCanvas.height = baseImg.height;
+            const brightness = s.colorizeBrightness ?? 1.0; const alpha = s.colorizeAlpha ?? 1.0;
+            const newR = Math.min(255, colorData[0] * brightness); const newG = Math.min(255, colorData[1] * brightness); const newB = Math.min(255, colorData[2] * brightness);
+            tempCtx.drawImage(baseImg, 0, 0);
+
+            const maskCanvas = document.createElement('canvas'); maskCanvas.width = baseImg.width; maskCanvas.height = baseImg.height;
+            const maskCtx = maskCanvas.getContext('2d', { willReadFrequently: true });
+            maskCtx.drawImage(baseImg, 0, 0);
+            const imageData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
+            const data = imageData.data;
+            
+            if (s.enableColorReplace ?? false) {
+                let targetColorsHsl = [];
+                (s.replaceColors || []).forEach(rc => {
+                    const hex = rc.color || '#00FF00';
+                    targetColorsHsl.push(rgbToHsl(parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)));
+                });
+
+                if(targetColorsHsl.length > 0) {
+                    const hueTolerance = s.hueTolerance ?? 30; const minSaturation = s.minSaturation ?? 0.15;
+                    for (let i = 0; i < data.length; i += 4) {
+                        if (data[i + 3] === 0) continue;
+                        const [h, sat, l] = rgbToHsl(data[i], data[i + 1], data[i + 2]);
+                        if (sat >= minSaturation) {
+                            const isMatch = targetColorsHsl.some(([targetH]) => { let diff = Math.abs(h - targetH); if (diff > 180) diff = 360 - diff; return diff <= hueTolerance; });
+                            if (!isMatch) data[i + 3] = 0;
+                        } else { data[i + 3] = 0; }
+                    }
+                }
+            }
+            maskCtx.putImageData(imageData, 0, 0);
+
+            const colorLayerCanvas = document.createElement('canvas'); colorLayerCanvas.width = baseImg.width; colorLayerCanvas.height = baseImg.height;
+            const colorLayerCtx = colorLayerCanvas.getContext('2d');
+            colorLayerCtx.drawImage(baseImg, 0, 0);
+            const colorLayerImageData = colorLayerCtx.getImageData(0,0,baseImg.width, baseImg.height);
+            const colorLayerData = colorLayerImageData.data;
+             for (let i = 0; i < colorLayerData.length; i += 4) {
+                 const gray = (colorLayerData[i] * 0.299 + colorLayerData[i+1] * 0.587 + colorLayerData[i+2] * 0.114);
+                 colorLayerData[i] = gray; colorLayerData[i+1] = gray; colorLayerData[i+2] = gray;
+             }
+            colorLayerCtx.putImageData(colorLayerImageData, 0, 0);
+
+            colorLayerCtx.globalCompositeOperation = s.colorizeBlendMode || 'multiply';
+            colorLayerCtx.fillStyle = `rgb(${newR}, ${newG}, ${newB})`;
+            colorLayerCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            colorLayerCtx.globalCompositeOperation = 'destination-in';
+            colorLayerCtx.drawImage(maskCanvas, 0, 0);
+            
+            tempCtx.globalAlpha = alpha;
+            tempCtx.drawImage(colorLayerCanvas, 0, 0);
+            tempCtx.globalAlpha = 1.0;
+            break;
+            }
+        case 'saydamlastir': {
+            const sourceImg = await getImage(s.source);
+            if (!sourceImg) return null;
+            tempCanvas.width = sourceImg.width; tempCanvas.height = sourceImg.height;
+            tempCtx.drawImage(sourceImg, 0, 0);
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+            const targetH = s.targetHue ?? 0;
+            const hueTol = s.hueTolerance ?? 30;
+            const minSat = s.minSaturation ?? 0;
+            const maxSat = s.maxSaturation ?? 1;
+            const minL = s.minLightness ?? 0;
+            const maxL = s.maxLightness ?? 1;
+
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i + 3] === 0) continue;
+                const [h, sat, l] = rgbToHsl(data[i], data[i + 1], data[i + 2]);
+                let diff = Math.abs(h - targetH);
+                if (diff > 180) diff = 360 - diff;
+                if (diff <= hueTol && sat >= minSat && sat <= maxSat && l >= minL && l <= maxL) {
+                    data[i + 3] = 0;
+                }
+            }
+            tempCtx.putImageData(imageData, 0, 0);
+            break;
+        }
+        case 'compose':
+            const base = await getImage(s.baseImage);
+            const top = await getImage(s.topImage);
+            if(!base) return null;
+            tempCanvas.width = top ? Math.max(base.width, top.width) : base.width; 
+            tempCanvas.height = top ? Math.max(base.height, top.height) : base.height;
+            tempCtx.globalAlpha = s.baseOpacity ?? 1.0;
+            tempCtx.drawImage(base, 0, 0);
+            if(top) {
+                tempCtx.globalCompositeOperation = s.composeMode || 'source-over';
+                tempCtx.globalAlpha = s.topOpacity ?? 1.0;
+                tempCtx.drawImage(top, 0, 0);
+            }
+            break;
+        case 'transform':
+             const sourceImage = await getImage(s.source);
+             if(!sourceImage) break;
+             const cropX = (s.cropX || 0) * sourceImage.width; const cropY = (s.cropY || 0) * sourceImage.height;
+             const cropW = (s.cropW || 1) * sourceImage.width; const cropH = (s.cropH || 1) * sourceImage.height;
+             const rotate = s.rotate || 0;
+             tempCanvas.width = cropW; tempCanvas.height = cropH;
+             if(rotate !== 0){
+                 tempCtx.translate(cropW / 2, cropH / 2);
+                 tempCtx.rotate(rotate * Math.PI / 180);
+                 tempCtx.drawImage(sourceImage, cropX, cropY, cropW, cropH, -cropW/2, -cropH/2, cropW, cropH);
+             } else {
+                 tempCtx.drawImage(sourceImage, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+             }
+             break;
+        case 'montage':
+            const parts = s.parts || [];
+            if(parts.length === 0) return null;
+            
+            let canvasBaseImage = mtTextures.find(t => t.path === mtPath);
+             if (!canvasBaseImage && getFileName(mtPath).startsWith('generated_')) {
+                canvasBaseImage = mcTextures.find(t => t.path === mtPath);
+            }
+            if (!canvasBaseImage) {
+                const firstValidPart = parts.find(p => p.source);
+                if (firstValidPart) canvasBaseImage = await getImage(firstValidPart.source);
+            }
+
+            const baseWidth = canvasBaseImage ? canvasBaseImage.width : 16;
+            const baseHeight = canvasBaseImage ? canvasBaseImage.height : 16;
+
+            tempCanvas.width = s.canvasW > 0 ? (s.canvasW * baseWidth) : baseWidth;
+            tempCanvas.height = s.canvasH > 0 ? (s.canvasH * baseHeight) : baseHeight;
+            
+            for(const p of parts) {
+                const partSource = await getImage(p.source);
+                if (!partSource) continue;
+                
+                const sx = (p.sx || 0) * partSource.width; const sy = (p.sy || 0) * partSource.height;
+                const sw = (p.sw || 1) * partSource.width; const sh = (p.sh || 1) * partSource.height;
+                const dx = (p.dx || 0) * tempCanvas.width; const dy = (p.dy || 0) * tempCanvas.height;
+                const rot = p.rotate || 0;
+
+                tempCtx.save();
+                tempCtx.translate(dx + sw / 2, dy + sh / 2);
+                tempCtx.rotate(rot * Math.PI / 180);
+                tempCtx.drawImage(partSource, sx, sy, sw, sh, -sw / 2, -sh / 2, sw, sh);
+                tempCtx.restore();
+            }
+            break;
+        default:
+            return null;
+    }
+
+    if ((s.canvasW && s.canvasW !== 1) || (s.canvasH && s.canvasH !== 1) || s.canvasOffsetX || s.canvasOffsetY) {
+        const finalCanvas = document.createElement('canvas');
+        const finalCtx = finalCanvas.getContext('2d');
+        finalCtx.imageSmoothingEnabled = false;
+        
+        const scaleW = s.canvasW > 0 ? s.canvasW : 1;
+        const scaleH = s.canvasH > 0 ? s.canvasH : 1;
+
+        finalCanvas.width = tempCanvas.width * scaleW;
+        finalCanvas.height = tempCanvas.height * scaleH;
+        
+        finalCtx.drawImage(tempCanvas, s.canvasOffsetX || 0, s.canvasOffsetY || 0);
+        return finalCanvas.toDataURL().split(',')[1];
+    }
+    
+    return tempCanvas.toDataURL().split(',')[1];
+};
+
+
+// --- APP INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', () => {
+    uploadView = document.getElementById('uploadView'); mapperView = document.getElementById('mapperView'); convertButton = document.getElementById('convertButton'); convertStatus = document.getElementById('convertStatus'); quickMatchButton = document.getElementById('quickMatchButton'); newConversionButton = document.getElementById('newConversionButton'); dropZoneMc = document.getElementById('dropZoneMc'); fileInputMc = document.getElementById('fileInputMc'); statusMc = document.getElementById('statusMc'); dropZoneMt = document.getElementById('dropZoneMt'); fileInputMt = document.getElementById('fileInputMt'); statusMt = document.getElementById('statusMt'); manageRuleSetsButton = document.getElementById('manageRuleSetsButton'); importRuleSetButton = document.getElementById('importRuleSetButton'); importRuleSetInput = document.getElementById('importRuleSetInput'); clearStorageButton = document.getElementById('clearStorageButton'); ruleSetModal = document.getElementById('ruleSetModal'); closeRuleSetModal = document.getElementById('closeRuleSetModal'); ruleSetList = document.getElementById('ruleSetList'); newRuleSetName = document.getElementById('newRuleSetName'); addRuleSetButton = document.getElementById('addRuleSetButton'); ruleSetContentHeader = document.getElementById('ruleSetContentHeader'); ruleSetContent = document.getElementById('ruleSetContent'); searchRuleSet = document.getElementById('searchRuleSet'); searchUnmapped = document.getElementById('searchUnmapped'); searchMapped = document.getElementById('searchMapped'); unmappedList = document.getElementById('unmappedList'); mappedList = document.getElementById('mappedList'); saveAllSessionButton = document.getElementById('saveAllSessionButton'); mappingModal = document.getElementById('mappingModal'); closeModal = document.getElementById('closeModal'); modalMtImage = document.getElementById('modalMtImage'); modalMtName = document.getElementById('modalMtName'); modalMtResolution = document.getElementById('modalMtResolution'); saveMappingButton = document.getElementById('saveMappingButton'); methodSelector = document.getElementById('methodSelector'); methodInputs = document.getElementById('methodInputs'); suggestionContainer = document.getElementById('suggestionContainer'); suggestionList = document.getElementById('suggestionList'); allMcContainer = document.getElementById('allMcContainer'); allMcHeader = document.getElementById('allMcHeader'); showAllMcButton = document.getElementById('showAllMcButton'); modalSearchInput = document.getElementById('modalSearchInput'); modalAllMcList = document.getElementById('modalAllMcList'); clearSessionMappingButton = document.getElementById('clearSessionMappingButton'); cloneMappingButton = document.getElementById('cloneMappingButton'); saveAsNewTextureButton = document.getElementById('saveAsNewTextureButton'); previewContainer = document.getElementById('previewContainer'); previewImage = document.getElementById('previewImage'); previewZoom = document.getElementById('previewZoom');
+    saveModal = document.getElementById('saveModal'); saveModalTitle = document.getElementById('saveModalTitle'); saveModalMessage = document.getElementById('saveModalMessage'); saveSetSelector = document.getElementById('saveSetSelector'); confirmSaveButton = document.getElementById('confirmSaveButton'); cancelSaveButton = document.getElementById('cancelSaveButton');
+    confirmModal = document.getElementById('confirmModal'); confirmTitleEl = document.getElementById('confirmTitleEl'); confirmMessage = document.getElementById('confirmMessage'); confirmYes = document.getElementById('confirmYes'); confirmNo = document.getElementById('confirmNo');
+    unmappedListHeader = document.getElementById('unmappedListHeader'); mappedListHeader = document.getElementById('mappedListHeader'); generatedTextureList = document.getElementById('generatedTextureList');
+    quickMatchView = document.getElementById('quickMatchView'); quickMatchSearchMt = document.getElementById('quickMatchSearchMt'); quickMatchSearchMc = document.getElementById('quickMatchSearchMc'); quickMatchMtList = document.getElementById('quickMatchMtList'); quickMatchMcList = document.getElementById('quickMatchMcList'); saveAndCloseQuickMatch = document.getElementById('saveAndCloseQuickMatch');
+    quickMatchColorSlider = document.getElementById('quickMatchColorSlider'); quickMatchStructureSlider = document.getElementById('quickMatchStructureSlider'); quickMatchNameSlider = document.getElementById('quickMatchNameSlider');
+    colorSlider = document.getElementById('colorSlider'); structureSlider = document.getElementById('structureSlider'); nameSlider = document.getElementById('nameSlider');
+    initialAnalysisStatus = document.getElementById('initialAnalysisStatus');
+
+    const setupCollapsibleList = (header, list) => {
+        header.addEventListener('click', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+            list.classList.toggle('hidden');
+            const icon = header.querySelector('i');
+            icon.classList.toggle('fa-chevron-up');
+            icon.classList.toggle('fa-chevron-down');
+        });
+    };
+
+    setupCollapsibleList(mappedListHeader, mappedList);
+    setupCollapsibleList(unmappedListHeader, unmappedList);
+    searchMapped.addEventListener('click', e => e.stopPropagation());
+    searchUnmapped.addEventListener('click', e => e.stopPropagation());
+
+
+    setupUploadListeners(dropZoneMc, fileInputMc, statusMc, (file) => processZip(file, mcTextures));
+    setupUploadListeners(dropZoneMt, fileInputMt, statusMt, (file) => processZip(file, mtTextures));
+    searchUnmapped.addEventListener('input', renderLists);
+    searchMapped.addEventListener('input', renderLists);
+    searchRuleSet.addEventListener('input', () => renderRuleSetContents(selectedRuleSetForEditing));
+    manageRuleSetsButton.addEventListener('click', () => {
+        ruleSetModal.classList.remove('hidden');
+        renderRuleSets();
+        renderRuleSetContents(selectedRuleSetForEditing);
+    });
+    newConversionButton.addEventListener('click', () => {
+        showConfirm(
+            translations[currentLang].confirmNewConversion,
+            () => {
+                if(scoringWorker) scoringWorker.terminate();
+                sessionMappings = {};
+                quickMatchSessionMappings = {};
+                searchMapped.value = '';
+                searchUnmapped.value = '';
+                renderLists();
+            },
+            'confirmNewConversionTitle'
+        );
+    });
+    quickMatchButton.addEventListener('click', openQuickMatchView);
+    saveAndCloseQuickMatch.addEventListener('click', saveAndCloseQuickMatchView);
+    quickMatchSearchMt.addEventListener('input', renderQuickMatchView);
+    quickMatchSearchMc.addEventListener('input', renderQuickMatchMcList);
+    closeRuleSetModal.addEventListener('click', () => { ruleSetModal.classList.add('hidden'); renderLists(); });
+    addRuleSetButton.addEventListener('click', () => createNewRuleSet(newRuleSetName.value));
+    newRuleSetName.addEventListener('keyup', (e) => { if (e.key === 'Enter') createNewRuleSet(newRuleSetName.value); });
+    importRuleSetButton.addEventListener('click', () => importRuleSetInput.click());
+    importRuleSetInput.addEventListener('change', importRuleSet);
+    closeModal.addEventListener('click', () => { mappingModal.classList.add('hidden'); document.body.style.overflow = 'auto'; renderLists(); currentMtPath = null; currentSourceInput = null; });
+    methodSelector.addEventListener('change', () => {
+        const newType = methodSelector.value;
+        const mtFilename = getFileName(currentMtPath);
+        let mapping = sessionMappings[mtFilename] || JSON.parse(JSON.stringify(getMappingFromActiveSets(mtFilename) || { type: newType, sources: {} }));
+        if (mapping.type !== newType) {
+            mapping.type = newType;
+            mapping.sources = {};
+        }
+        sessionMappings[mtFilename] = mapping;
+        updateMethodInputs(mapping);
+        renderLists();
+    });
+    showAllMcButton.addEventListener('click', () => { const isHidden = allMcContainer.classList.toggle('hidden'); showAllMcButton.innerHTML = isHidden ? translations[currentLang].showAllButton : translations[currentLang].hideButton; if (!isHidden) renderModalAllMcList(); });
+    modalSearchInput.addEventListener('input', renderModalAllMcList);
+    clearSessionMappingButton.addEventListener('click', clearSessionMapping);
+    cloneMappingButton.addEventListener('click', handleCloneMapping);
+    saveAsNewTextureButton.addEventListener('click', handleSaveAsNewTexture);
+    saveMappingButton.addEventListener('click', handleSaveMapping);
+    saveAllSessionButton.addEventListener('click', handleSaveAllSessionMappings);
+    convertButton.addEventListener('click', runConversion);
+    clearStorageButton.addEventListener('click', () => showConfirm(translations[currentLang].confirmClearStorage, clearLocalStorage));
+    confirmYes.addEventListener('click', () => handleConfirm(true));
+    confirmNo.addEventListener('click', () => handleConfirm(false));
+    cancelSaveButton.addEventListener('click', closeSaveModal);
+    confirmSaveButton.addEventListener('click', confirmSave);
+    previewZoom.addEventListener('input', (e) => {
+        isFirstPreviewLoad = false; // User took control
+        const scale = e.target.value;
+        const checkerboardDiv = previewImage.parentElement;
+        checkerboardDiv.style.transform = `scale(${scale})`;
+    });
+    document.querySelectorAll('.lang-switcher button').forEach(btn => {
+        btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+    });
+
+    const handleWeightChange = () => {
+        saveStateToLocal();
+        if (!mappingModal.classList.contains('hidden')) {
+            triggerSuggestions();
+        }
+        if (!quickMatchView.classList.contains('hidden')) {
+            renderQuickMatchView();
+        }
+    };
+    colorSlider.addEventListener('input', handleWeightChange);
+    structureSlider.addEventListener('input', handleWeightChange);
+    nameSlider.addEventListener('input', handleWeightChange);
+
+    const quickMatchSliders = [quickMatchColorSlider, quickMatchStructureSlider, quickMatchNameSlider];
+    const mainSliders = [colorSlider, structureSlider, nameSlider];
+
+    quickMatchSliders.forEach((qms, index) => {
+        if(qms) {
+            qms.addEventListener('input', () => {
+                mainSliders[index].value = qms.value;
+                handleWeightChange();
+            });
+        }
+    });
+
+    loadStateFromLocal();
+    setLanguage(currentLang);
+});
+</script>
+</body>
+</html>
